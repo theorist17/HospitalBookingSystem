@@ -1,0 +1,9 @@
+/**
+ * 
+ */
+/**
+ * @author theorist
+ *
+ */
+module HospitalBookingSystem {
+}
