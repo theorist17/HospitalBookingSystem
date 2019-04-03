@@ -10,7 +10,7 @@ public class DBManager {
 	static Connection connection = null;
 	static PreparedStatement preparedStatement = null;
 
-	void LoadDriver() {
+	public void LoadDriver() {
 
 		try {
 			// The newInstance() call is a work around for some
@@ -25,13 +25,14 @@ public class DBManager {
 
 	}
 
-	void LoadConnection() {
+	public void LoadConnection() {
 		try {
-			//connection = DriverManager.getConnection("jdbc:mysql://localhost/test?" + "user=minty&password=greatsqldb");
-			connection = DriverManager.getConnection("jdbc:mysql://1.240.123.168/hosptial?" + "user=theorist&password=OPP@27#mys");
+			connection = DriverManager
+					.getConnection("jdbc:mysql://1.240.123.168:3306/hospital?" + "user=dev&password=MySQL!=1");
 
 			// Do something with the Connection
-			
+			preparedStatement = connection.prepareStatement("INSERT INTO patients (name) values ('hello');");
+			preparedStatement.executeUpdate();
 		} catch (SQLException ex) {
 			// handle any errors
 			System.out.println("SQLException: " + ex.getMessage());
