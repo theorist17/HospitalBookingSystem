@@ -4,12 +4,14 @@ public class Booking {
 	String patientID;
 	String timeStart;
 	String timeEnd;
+	int hasPaid;
 	
-	public Booking(String patientID, String timeStart, String timeEnd) {
+	public Booking(String patientID, String timeStart, String timeEnd, int hasPaid) {
 		super();
 		this.patientID = patientID;
 		this.timeStart = timeStart;
 		this.timeEnd = timeEnd;
+		this.hasPaid = hasPaid;
 	}
 	public String getPatientID() {
 		return patientID;

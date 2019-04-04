@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DBManager {
 
@@ -320,9 +322,9 @@ public class DBManager {
 					int appointmentId = resultSet.getInt("appointmentId");
 					patientId = resultSet.getString("patientId");
 					int doctorId = resultSet.getInt("doctorId");
-					String startTime = resultSet.getString("timeStart");
-					String entTime = resultSet.getString("timeEnd");
-					appointment = new Appointment(appointmentId, patientId, doctorId, startTime, entTime);
+					String timeStart = resultSet.getString("timeStart");
+					String timeEnd = resultSet.getString("timeEnd");
+					appointment = new Appointment(appointmentId, patientId, doctorId, timeStart, timeEnd, 0);
 					return appointment;
 				}
 			}
@@ -335,18 +337,18 @@ public class DBManager {
 		return null;
 	}
 	
-	Patient getPatient(String patientId) {
+	Patient getPatient(String patientID) {
 		try {
 			PreparedStatement statement = DBConn.prepareStatement("SELECT * FROM patients WHERE patientID = ?");
-			statement.setString(1, patientId);
+			statement.setString(1, patientID);
 
 			try (ResultSet resultSet = statement.executeQuery()) {
 				
 				Patient patient = null;
 				while(resultSet.next()) {
-					patientId = resultSet.getString("patientId");
+					patientID = resultSet.getString("patientID");
 					String name = resultSet.getString("name");
-					patient = new Patient(patientId, name);
+					patient = new Patient(patientID, name);
 					return patient;
 				}
 			}
@@ -358,6 +360,61 @@ public class DBManager {
 		}
 		return null;
 	}
+	
+	List<Booking> getBookings(String patientID) {
+		try {
+			PreparedStatement statement = DBConn.prepareStatement("SELECT  *, 'appointment' as Source\n" + 
+					"FROM appointments\n" + 
+					"where hasPaid = 0 and patientID = ?\n" + 
+					"union \n" + 
+					"SELECT *, 'checkup' as Source\n" + 
+					"FROM checkups \n" + 
+					"where hasPaid = 0 and patientID = ?\n" + 
+					"union\n" + 
+					"SELECT *, 'stay' as Source\n" + 
+					"FROM stays \n" + 
+					"where hasPaid = 0 and patientID = ?;");
+			statement.setString(1, patientID);
+			statement.setString(2, patientID);
+			statement.setString(3, patientID);
+
+			try (ResultSet resultSet = statement.executeQuery()) {
+				
+				Patient patient = null;
+				List<Booking> bookings = new ArrayList<Booking>();
+				
+				while(resultSet.next()) {
+					String bookingType = resultSet.getString("Source");
+					
+					//getting attributes for all bookings
+					int bookingID = resultSet.getInt(1);
+					patientID = resultSet.getString("patientID");
+					int resourceID = resultSet.getInt(3);
+					String timeStart = resultSet.getString("timeStart");
+					String timeEnd = resultSet.getString("timeEnd");
+					int hasPaid = resultSet.getInt("hasPaid");
+					if(bookingType.equals("appointment")) { 
+						Appointment appointment = new Appointment(bookingID, patientID, resourceID, timeStart, timeEnd, hasPaid);
+						bookings.add((Booking)appointment);
+					} else if(bookingType.equals("checkup")) { 
+						Checkup checkup = new Checkup(bookingID, patientID, resourceID, timeStart, timeEnd, hasPaid);
+						bookings.add((Booking)checkup);
+					} else if(bookingType.equals("stay")) { 
+						Stay stay = new Stay(bookingID, patientID, resourceID, timeStart, timeEnd, hasPaid);
+						bookings.add((Booking)stay);
+					} 
+				}
+				return bookings;
+			}
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	
 	
 	public static void log(String string) {

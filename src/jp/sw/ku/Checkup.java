@@ -4,8 +4,13 @@ public class Checkup extends Booking {
 	int checkupID;
 	int testID;
 	
-	public Checkup(String patientID, int testID, String timeStart, String timeEnd) {
-		super(patientID, timeStart, timeEnd);
+	public Checkup(int checkupID, String patientID, int testID, String timeStart, String timeEnd, int hasPaid) {
+		super(patientID, timeStart, timeEnd, hasPaid);
+		this.checkupID = checkupID;
+		this.testID = testID;
+	}
+	public Checkup(String patientID, int testID, String timeStart, String timeEnd, int hasPaid) {
+		super(patientID, timeStart, timeEnd, hasPaid);
 		this.testID = testID;
 	}
 	public int getCheckupID() {

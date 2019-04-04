@@ -4,8 +4,15 @@ public class Stay extends Booking {
 	int stayID;
 	int bedID;
 	
-	public Stay(String patientID, int bedID, String timeStart, String timeEnd) {
-		super(patientID, timeStart, timeEnd);
+
+	public Stay(int stayID, String patientID, int bedID, String timeStart, String timeEnd, int hasPaid) {
+		super(patientID, timeStart, timeEnd, hasPaid);
+		this.stayID = stayID;
+		this.bedID = bedID;
+	}
+	
+	public Stay(String patientID, int bedID, String timeStart, String timeEnd, int hasPaid) {
+		super(patientID, timeStart, timeEnd, hasPaid);
 		this.bedID = bedID;
 	}
 	public int getStayID() {

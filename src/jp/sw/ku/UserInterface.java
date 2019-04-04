@@ -3,6 +3,8 @@ package jp.sw.ku;
 import java.sql.Date;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.text.SimpleDateFormat;
+import java.util.List;
+
 
 public class UserInterface {
 	public static void main(String[] args) {
@@ -20,6 +22,7 @@ public class UserInterface {
 //		DBManager.addCheckup(new Checkup("9203221234567", 3, startTime, startTime));
 //		DBManager.addStay(new Stay("9203221234567", 3, startTime, startTime));
 //		System.out.println(DBManager.getPatient("9203221234567").getName());
-		System.out.println(DBManager.getAppointment("9203221234567").timeStart);
+//		System.out.println(DBManager.getAppointment("9203221234567").timeStart);
+		List<Booking> bookings = DBManager.getBookings("9203221234567");
 	}
 }
