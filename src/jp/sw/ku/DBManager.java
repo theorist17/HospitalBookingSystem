@@ -360,10 +360,36 @@ public class DBManager {
 		}
 		return null;
 	}
+	Doctor getDoctor(int doctorID) {
+		try {
+			PreparedStatement statement = DBConn.prepareStatement("SELECT * FROM doctors WHERE doctorID = ?");
+			statement.setInt(1, doctorID);
+
+			try (ResultSet resultSet = statement.executeQuery()) {
+				
+				Doctor doctor = null;
+				while(resultSet.next()) {
+					doctorID = resultSet.getInt("doctorID");
+					String name = resultSet.getString("name");
+					String department = resultSet.getString("department");
+					int price = resultSet.getInt("price");
+					doctor = new Doctor(doctorID, name, department, price);
+					return doctor;
+				}
+			}
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	List<Booking> getBookings(String patientID) {
 		try {
-			PreparedStatement statement = DBConn.prepareStatement("SELECT  *, 'appointment' as Source\n" + 
+			PreparedStatement statement = DBConn.prepareStatement(
+					"SELECT  *, 'appointment' as Source\n" + 
 					"FROM appointments\n" + 
 					"where hasPaid = 0 and patientID = ?\n" + 
 					"union \n" + 
@@ -393,6 +419,7 @@ public class DBManager {
 					String timeStart = resultSet.getString("timeStart");
 					String timeEnd = resultSet.getString("timeEnd");
 					int hasPaid = resultSet.getInt("hasPaid");
+					
 					if(bookingType.equals("appointment")) { 
 						Appointment appointment = new Appointment(bookingID, patientID, resourceID, timeStart, timeEnd, hasPaid);
 						bookings.add((Booking)appointment);
@@ -415,6 +442,17 @@ public class DBManager {
 		return null;
 	}
 	
+	void printBookings(String patientID) {
+		List<Booking> bookings = getBookings(patientID);
+		for (int i = 0 ; i  < bookings.size(); i++) {
+			if(bookings.get(i) instanceof Appointment) {
+				Appointment appointment = (Appointment) bookings.get(i);
+				System.out.println("Appointment, " + appointment.getDoctorID() + "&"+
+						getDoctor(appointment.getDoctorID()).getName()+ ", "+
+						appointment.getTimeStart()+", "+appointment.getTimeEnd());
+			}
+		}
+	}
 	
 	
 	public static void log(String string) {

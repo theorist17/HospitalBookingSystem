@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 
+
 public class UserInterface {
 	public static void main(String[] args) {
 		DBManager DBManager = new DBManager();
@@ -23,6 +24,7 @@ public class UserInterface {
 //		DBManager.addStay(new Stay("9203221234567", 3, startTime, startTime));
 //		System.out.println(DBManager.getPatient("9203221234567").getName());
 //		System.out.println(DBManager.getAppointment("9203221234567").timeStart);
-		List<Booking> bookings = DBManager.getBookings("9203221234567");
+//		List<Booking> bookings = DBManager.getBookings("9203221234567");
+		DBManager.printBookings("9203221234567");
 	}
 }

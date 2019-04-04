@@ -3,8 +3,17 @@ package jp.sw.ku;
 class Doctor {
 	int doctorId;
 	String name;
+	String department;
 	int price;
 	
+	
+	public Doctor(int doctorId, String name, String department, int price) {
+		super();
+		this.doctorId = doctorId;
+		this.name = name;
+		this.department = department;
+		this.price = price;
+	}
 	public Doctor(String name, int price) {
 		super();
 		this.name = name;
@@ -21,6 +30,13 @@ class Doctor {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public String getDepartment() {
+		return department;
+	}
+	public void setDepartment(String department) {
+		this.department = department;
 	}
 	public int getPrice() {
 		return price;

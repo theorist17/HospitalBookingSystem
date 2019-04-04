@@ -25,6 +25,5 @@ class Appointment extends Booking {
 	public void setDoctorID(int doctorID) {
 		this.doctorID = doctorID;
 	}
-
 	
 }
