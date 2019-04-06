@@ -179,12 +179,14 @@ public class MainScene {
    }
    private boolean goPatientMenu4() {
       UserInterface.getInstance().printAppointPatient();
-      String Patient=this.scan.nextLine();
-      if(StringChecker.checkPersonalNum(Patient)) {
-    	  System.out.println("예약정보 출력");
+      String patientLine=this.scan.nextLine();
+      if(StringChecker.checkPersonalNum(patientLine)) {
+    	  Patient patient = dbManager.getPatient(patientLine.split("\\/")[1]);
+    	  dbManager.printBookings(patient.getPatientId());
     	  System.out.println("수납하실 예약의 번호를 입력하세요.");
     	  String num=this.scan.nextLine();
     	  if(StringChecker.payment(num)) {
+    		  dbManager.setHaspaid(patient, dbManager.getBookings(patient.getPatientId()), Integer.parseInt(num));
     		  System.out.println("수납완료되었습니다.");
     		 return goMainMenu();
     	  }    	  

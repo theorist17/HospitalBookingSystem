@@ -438,7 +438,7 @@ public class DBManager {
 		return null;
 	}
 
-	boolean setHaspaid(Patient patient, List<Booking> bookings, int lineNo) { // 입력값과, 부킹리스트를 매개변수로 받아
+	public boolean setHaspaid(Patient patient, List<Booking> bookings, int lineNo) { // 입력값과, 부킹리스트를 매개변수로 받아
 		try { // 시도하자
 			PreparedStatement statement;
 			// 디비에있는것만 바꿔주자.
@@ -463,20 +463,14 @@ public class DBManager {
 			}
 
 			int affectedRows = statement.executeUpdate();
-
-			if (affectedRows == 0) {
+				
+			if (affectedRows == 1) {
+				bookings.get(lineNo - 1).setHasPaid(1);
+				return true;
+			} else {
 				throw new SQLException("UPDATE haspaid failed, no rows affected.");
-			}
 
-			try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-				if (generatedKeys.next()) {
-					bookings.get(lineNo - 1).setHasPaid(1);
-					return true;
-				} else {
-					throw new SQLException("UPDATE haspaid failed, no ID obtained.");
-				}
 			}
-
 		} catch (SQLException e) {
 			System.err.println("SQLException: " + e.getMessage());
 			System.err.println("SQLState: " + e.getSQLState());

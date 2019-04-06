@@ -71,11 +71,10 @@ public class StringChecker {
    }
    
    public static boolean payment(String pay) {
-      if(!pay.matches("[1-9]+[1-9]?") || !pay.matches("^[q]{1}$")) {
-         //UIManagerError
-         return false;
-      }
-      return true;
+      if(pay.matches("[1-9]+[1-9]?"))
+    	  return true;
+      else
+    	  return false;
    }
    
    public static boolean checkPersonalNum(String personalNum) {
