@@ -31,4 +31,11 @@ public class Booking {
 	public void setTimeEnd(String timeEnd) {
 		this.timeEnd = timeEnd;
 	}
+	public int getHasPaid() {
+		return hasPaid;
+	}
+	public void setHasPaid(int hasPaid) {
+		this.hasPaid = hasPaid;
+	}
+	
 }

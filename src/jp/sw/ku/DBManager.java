@@ -14,7 +14,7 @@ public class DBManager {
 
 	Connection DBConn = null;
 
-	void LoadDriver() {
+	public void LoadDriver() {
 
 		try {
 			// The newInstance() call is a work around for some
@@ -29,7 +29,7 @@ public class DBManager {
 
 	}
 
-	void LoadConnection() {
+	public void LoadConnection() {
 		try {
 			DBConn = DriverManager
 					.getConnection("jdbc:mysql://1.240.123.168:3306/hospital?" + "user=dev&password=MySQL!=1");
@@ -46,11 +46,7 @@ public class DBManager {
 		}
 	}
 
-	/**
-	 * @param patient
-	 * @return null if duplicate patient ID
-	 */
-	String addPatient(Patient patient) {
+	public String addPatient(Patient patient) {
 		try {
 			PreparedStatement statement = DBConn
 					.prepareStatement("INSERT INTO patients (patientID, name) VALUES (?, ?)");
@@ -77,7 +73,7 @@ public class DBManager {
 		return null;
 	}
 
-	int addDoctor(Doctor doctor) {
+	public int addDoctor(Doctor doctor) {
 		try {
 			PreparedStatement statement = DBConn.prepareStatement("INSERT INTO doctors (name, price) VALUES (?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
@@ -110,7 +106,7 @@ public class DBManager {
 		return -1;
 	}
 
-	int addTest(Test test) {
+	public int addTest(Test test) {
 		try {
 			PreparedStatement statement = DBConn.prepareStatement("INSERT INTO tests (name, price) VALUES (?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
@@ -143,7 +139,7 @@ public class DBManager {
 		return -1;
 	}
 
-	int addRooms(Room room) {
+	public int addRooms(Room room) {
 		try {
 			PreparedStatement statement = DBConn.prepareStatement("INSERT INTO rooms (capacity) VALUES (?)",
 					Statement.RETURN_GENERATED_KEYS);
@@ -175,7 +171,7 @@ public class DBManager {
 		return -1;
 	}
 
-	int addBeds(Bed bed) {
+	public int addBeds(Bed bed) {
 		try {
 			PreparedStatement statement = DBConn.prepareStatement("INSERT INTO beds (roomID, price) VALUES (?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
@@ -208,7 +204,7 @@ public class DBManager {
 		return -1;
 	}
 	
-	int addAppointment(Appointment appointment) {
+	public int addAppointment(Appointment appointment) {
 		try {
 			PreparedStatement statement = DBConn.prepareStatement("INSERT INTO appointments (patientID, doctorID, timeStart, timeEnd) VALUES (?, ?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
@@ -242,7 +238,7 @@ public class DBManager {
 		return -1;
 	}
 
-	int addCheckup(Checkup checkup) {
+	public int addCheckup(Checkup checkup) {
 		try {
 			PreparedStatement statement = DBConn.prepareStatement("INSERT INTO checkups (patientID, testID, timeStart, timeEnd) VALUES (?, ?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
@@ -276,7 +272,7 @@ public class DBManager {
 		return -1;
 	}
 	
-	int addStay(Stay stay) {
+	public int addStay(Stay stay) {
 		try {
 			PreparedStatement statement = DBConn.prepareStatement("INSERT INTO stays (patientID, bedID, timeStart, timeEnd) VALUES (?, ?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
@@ -310,7 +306,7 @@ public class DBManager {
 		return -1;
 	}
 	
-	Appointment getAppointment(String patientId) {
+	public Appointment getAppointment(String patientId) {
 		try {
 			PreparedStatement statement = DBConn.prepareStatement("SELECT * FROM patients p, appointments a WHERE p.patientID = ? and p.patientID = a.patientID");
 			statement.setString(1, patientId);
@@ -337,7 +333,7 @@ public class DBManager {
 		return null;
 	}
 	
-	Patient getPatient(String patientID) {
+	public Patient getPatient(String patientID) {
 		try {
 			PreparedStatement statement = DBConn.prepareStatement("SELECT * FROM patients WHERE patientID = ?");
 			statement.setString(1, patientID);
@@ -360,7 +356,7 @@ public class DBManager {
 		}
 		return null;
 	}
-	Doctor getDoctor(int doctorID) {
+	public Doctor getDoctor(int doctorID) {
 		try {
 			PreparedStatement statement = DBConn.prepareStatement("SELECT * FROM doctors WHERE doctorID = ?");
 			statement.setInt(1, doctorID);
@@ -386,7 +382,7 @@ public class DBManager {
 		return null;
 	}
 	
-	List<Booking> getBookings(String patientID) {
+	public List<Booking> getBookings(String patientID) {
 		try {
 			PreparedStatement statement = DBConn.prepareStatement(
 					"SELECT  *, 'appointment' as Source\n" + 
@@ -441,19 +437,66 @@ public class DBManager {
 		}
 		return null;
 	}
-	
-	void printBookings(String patientID) {
+
+	boolean setHaspaid(Patient patient, List<Booking> bookings, int lineNo) { // 입력값과, 부킹리스트를 매개변수로 받아
+		try { // 시도하자
+			PreparedStatement statement;
+			// 디비에있는것만 바꿔주자.
+			// apo che 아이디만 갖으면 되니깐
+			// 스트링체커도 다 하고있음.
+			// 입력된 patient의 주민 == 디비의 주민
+			if (bookings.get(lineNo - 1) instanceof Appointment) {
+				Appointment appointment = (Appointment) bookings.get(lineNo - 1);
+				statement = DBConn.prepareStatement("UPDATE appointments SET hasPaid=1 WHERE appointmentID=?;",
+						Statement.RETURN_GENERATED_KEYS);
+				statement.setInt(1, appointment.getAppointmentID());
+			} else if (bookings.get(lineNo - 1) instanceof Checkup) {
+				Checkup checkup = (Checkup) bookings.get(lineNo - 1);
+				statement = DBConn.prepareStatement("UPDATE checkups SET hasPaid=1 WHERE checkupID=?;",
+						Statement.RETURN_GENERATED_KEYS);
+				statement.setInt(1, checkup.getCheckupID());
+			} else {
+				Stay stay = (Stay) bookings.get(lineNo - 1);
+				statement = DBConn.prepareStatement("UPDATE stays SET hasPaid=1 WHERE stayID=?;",
+						Statement.RETURN_GENERATED_KEYS);
+				statement.setInt(1, stay.getStayID());
+			}
+
+			int affectedRows = statement.executeUpdate();
+
+			if (affectedRows == 0) {
+				throw new SQLException("UPDATE haspaid failed, no rows affected.");
+			}
+
+			try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+				if (generatedKeys.next()) {
+					bookings.get(lineNo - 1).setHasPaid(1);
+					return true;
+				} else {
+					throw new SQLException("UPDATE haspaid failed, no ID obtained.");
+				}
+			}
+
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public void printBookings(String patientID) {
 		List<Booking> bookings = getBookings(patientID);
 		for (int i = 0 ; i  < bookings.size(); i++) {
 			if(bookings.get(i) instanceof Appointment) {
 				Appointment appointment = (Appointment) bookings.get(i);
-				System.out.println("Appointment, " + appointment.getDoctorID() + "&"+
+				System.out.println((i+1) + " Appointment, " + appointment.getDoctorID() + "&"+
 						getDoctor(appointment.getDoctorID()).getName()+ ", "+
 						appointment.getTimeStart()+", "+appointment.getTimeEnd());
 			}
 		}
 	}
-	
 	
 	public static void log(String string) {
 		System.err.println(string);
