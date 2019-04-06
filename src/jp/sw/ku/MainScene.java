@@ -1,5 +1,9 @@
 package jp.sw.ku;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Scanner;
 
 import hospital.UI.eText;
@@ -10,8 +14,10 @@ public class MainScene {
    DBManager dbManager;
    StringChecker stringCheck=new StringChecker();
    Scanner scan = new Scanner (System.in);
+   ClockManager clockManager;
    public void doProcess() {
 	  dbManager = new DBManager();
+	  clockManager = new ClockManager();
 	  dbManager.LoadDriver();
 	  dbManager.LoadConnection();
       while(this.goMainMenu()) {};
@@ -99,11 +105,26 @@ public class MainScene {
 				String diagnosis = "";
 				diagnosis = this.scan.nextLine();
 				
-				
 				// 스트링체크
 				// DBManager.addPatient(diagnosis);
 				// DBManager.addAppointment(appointment);
 				if (stringCheck.checkDiag(diagnosis)) {
+					String[] word = diagnosis.split("\\/");
+					String patientName = word[0];
+					String patientID = word[1];
+					String doctorID = word[2];
+					String timeStart = word[3];
+					
+					// 초진
+					Patient patient = dbManager.getPatient(patientID);
+					if (patient == null) {
+						dbManager.addPatient(new Patient(patientName, patientID));
+						dbManager.addAppointment(new Appointment(patient.getPatientId(), Integer.parseInt(doctorID), ClockManager.clockDiag(timeStart), ClockManager.addHour(timeStart), 0));
+					// 초진 or 재진 
+					} else {
+						dbManager.addAppointment(new Appointment(patient.getPatientId(), Integer.parseInt(doctorID), ClockManager.clockDiag(timeStart), ClockManager.addHour(timeStart), 0));
+					}
+
 					System.out.println("진료예약이 완료되었습니다.");
 					return goMainMenu();
 				} else {

@@ -56,9 +56,9 @@ public class DBManager {
 			int affectedRows = statement.executeUpdate();
 
 			if (affectedRows == 0) {
-				throw new SQLException("INSERT failed, no rows affected.");
+				
 			} else {
-
+				
 			}
 			log("Patient " + patient.getPatientId() + " added successfully.");
 			return patient.getPatientId();
@@ -469,8 +469,8 @@ public class DBManager {
 				return true;
 			} else {
 				throw new SQLException("UPDATE haspaid failed, no rows affected.");
-
 			}
+			
 		} catch (SQLException e) {
 			System.err.println("SQLException: " + e.getMessage());
 			System.err.println("SQLState: " + e.getSQLState());

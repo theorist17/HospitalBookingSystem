@@ -1,5 +1,6 @@
 package input;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -9,32 +10,41 @@ import java.text.SimpleDateFormat;
 
 public class ClockManager {
    
-   public static Date clockDiag(String diag) {
-      
-      String startClock = diag.substring(17);
-      String pattern = "yyyyMMddHHmm";
-      DateFormat date = new SimpleDateFormat(pattern);
-      Date diagDate = null;
-      
-      try {
-      diagDate = date.parse(startClock);
-      return diagDate;
+	public static String addHour(String timeStart) {
+		Calendar calendar = Calendar.getInstance();
+		try {
+			calendar.setTime(new SimpleDateFormat("yyyyMMddhh").parse(timeStart));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		calendar.add(Calendar.HOUR_OF_DAY, 1);
+		String timeEnd = new SimpleDateFormat("yyyyMMddhh").format(calendar.getTime());
+		return clockDiag(timeEnd);
+	}
+	public static String clockDiag(String diag) {
 
-      }catch(ParseException e) {
-         e.printStackTrace();
-      }
-      return diagDate;
-   }
+		String pattern = "yyyyMMddhh";
+		DateFormat date = new SimpleDateFormat(pattern);
+		Date diagDate = null;
+
+		try {
+			diagDate = date.parse(diag);
+			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(diagDate);
+
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
    
    public static Date clockCheckUp(String checkUp) {
       
-      String startClock = checkUp.substring(17);
-      String pattern = "yyyyMMddHHmm";
+      String pattern = "yyyy-MM-dd HH:mm:ss";
       DateFormat date = new SimpleDateFormat(pattern);
       Date checkUpDate = null;
       
       try {
-      checkUpDate = date.parse(startClock);
+      checkUpDate = date.parse(checkUp);
       return checkUpDate;
 
       }catch(ParseException e) {
@@ -45,13 +55,12 @@ public class ClockManager {
    
    public static Date clockStartAdmission(String admission) {
       
-      String startClock = admission.substring(18,10);
-      String pattern = "yyyyMMddHHmm";
+      String pattern = "yyyy-MM-dd HH:mm:ss";
       DateFormat date = new SimpleDateFormat(pattern);
       Date startAdmissionDate = null;
       
       try {   
-      startAdmissionDate = date.parse(startClock);
+      startAdmissionDate = date.parse(admission);
       return startAdmissionDate;
 
       }catch(ParseException e) {
@@ -62,13 +71,12 @@ public class ClockManager {
    
    public static Date clockEndAdmission(String admission) {
       
-      String endClock = admission.substring(28,10);
-      String pattern = "yyyyMMddHHmm";
+      String pattern = "yyyy-MM-dd HH:mm:ss";
       DateFormat date = new SimpleDateFormat(pattern);
       Date endAdmissionDate = null;
       
       try {
-      endAdmissionDate = date.parse(endClock);
+      endAdmissionDate = date.parse(admission);
       return endAdmissionDate;
 
       }catch(ParseException e) {

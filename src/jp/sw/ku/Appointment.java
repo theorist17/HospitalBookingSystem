@@ -4,13 +4,13 @@ class Appointment extends Booking {
 	int appointmentID;
 	int doctorID;
 	
-	public Appointment(int appointmentID, String patientID, int doctorID, String timeStart, String timeEnd, int booking) {
-		super(patientID, timeStart, timeEnd, booking);
+	public Appointment(int appointmentID, String patientID, int doctorID, String timeStart, String timeEnd, int hasPaid) {
+		super(patientID, timeStart, timeEnd, hasPaid);
 		this.appointmentID = appointmentID;
 		this.doctorID = doctorID;
 	}
-	public Appointment(String patientID, int doctorID, String timeStart, String timeEnd, int booking) {
-		super(patientID, timeStart, timeEnd, booking);
+	public Appointment(String patientID, int doctorID, String timeStart, String timeEnd, int hasPaid) {
+		super(patientID, timeStart, timeEnd, hasPaid);
 		this.doctorID = doctorID;
 	}
 	public int getAppointmentID() {

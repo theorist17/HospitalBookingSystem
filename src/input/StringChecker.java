@@ -84,8 +84,8 @@ public class StringChecker {
       }
       return true;
    }
-   public static boolean checkOnlyPersonalNum(String personalNum) {
-	      if(!personalNum.matches("[0-9]{13}")) {
+   public static boolean checkOnlyPersonalNum(String onlyPersonalNum) {
+	      if(!onlyPersonalNum.matches("[0-9]{13}")) {
 	         //UIManagerError
 	         return false;
 	      }
