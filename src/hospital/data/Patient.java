@@ -1,8 +1,8 @@
-package jp.sw.ku;
+package hospital.data;
 
-class Patient {
-	String patientId;
-	String name;
+public class Patient {
+	private String patientId;
+	private String name;
 	
 	public Patient(String patientId, String name) {
 		super();

@@ -1,8 +1,8 @@
-package jp.sw.ku;
+package hospital.data;
 
-class Room {
-	int roomID;
-	int capacity;
+public class Room {
+	private int roomID;
+	private int capacity;
 	
 	public Room(int capacity) {
 		super();

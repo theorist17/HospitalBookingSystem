@@ -35,14 +35,19 @@ public enum eText{
       CheckUp_InputInformation("이름/주민번호/검사번호/시작시간 순으로 입력하세요."),
       Bed_Information("침대위치/침대번호 출력"),
       Bed_InputInformation("이름/주민번호/침대번호/시작시간/종료시간 순으로 입력하세요."),
-      Appointment_Patient("예약하신 환자의이름,주민번호를 입력하세요."),
+      Appointment_Patient("예약하신 환자의 이름/주민번호를 입력하세요."),
       Input_Error("올바르지 않은 입력입니다."),
+      First_Visit("초진의 경우 진료예약만 가능합니다.")
          ;      
-       final private String text;
-      private eText(String text){
-         this.text = text;}
-      //System.out.println(this.text); unit test         }
-      public String getText(){
-         return text;
-      }
+	
+	final private String text;
+
+	private eText(String text) {
+		this.text = text;
+	}
+
+	// System.out.println(this.text); unit test }
+	public String getText() {
+		return text;
+	}
 }

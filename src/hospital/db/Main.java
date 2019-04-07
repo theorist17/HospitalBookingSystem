@@ -1,12 +1,10 @@
-package jp.sw.ku;
-
-
+package hospital.db;
 
 public class Main {
 
-   public static void main(String[] args) {
+	public static void main(String[] args) {
 
-	  new MainScene().doProcess();
-      return;
-}
+		new MainScene().doProcess();
+		return;
+	}
 }
