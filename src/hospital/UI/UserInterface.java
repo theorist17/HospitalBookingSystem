@@ -84,7 +84,11 @@ public class UserInterface {
 	}
 	
 	public void printVisitError() {
-		this.printTextWithKey(eText.First_Visit);
+		this.printTextWithKey(eText.FirstVisit_Error);
+	}
+
+	public void printTimeOverlapError() {
+		this.printTextWithKey(eText.TimeOverlap_Error);
 	}
 
 	/*

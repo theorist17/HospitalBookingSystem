@@ -23,6 +23,7 @@ import hospital.data.Test;
 public class DBManager {
 
 	private Connection conn = null;
+	private PreparedStatement statement = null;
 
 	public void LoadDriver() {
 
@@ -58,7 +59,7 @@ public class DBManager {
 
 	public String addPatient(Patient patient) {
 		try {
-			PreparedStatement statement = conn.prepareStatement("INSERT INTO patients (patientID, name) VALUES (?, ?)");
+			statement = conn.prepareStatement("INSERT INTO patients (patientID, name) VALUES (?, ?)");
 			statement.setString(1, patient.getPatientId());
 			statement.setString(2, patient.getName());
 
@@ -84,7 +85,7 @@ public class DBManager {
 
 	public int addDoctor(Doctor doctor) {
 		try {
-			PreparedStatement statement = conn.prepareStatement("INSERT INTO doctors (name, price) VALUES (?, ?)",
+			statement = conn.prepareStatement("INSERT INTO doctors (name, price) VALUES (?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
 			statement.setString(1, doctor.getName());
 			statement.setInt(2, doctor.getPrice());
@@ -117,7 +118,7 @@ public class DBManager {
 
 	public int addTest(Test test) {
 		try {
-			PreparedStatement statement = conn.prepareStatement("INSERT INTO tests (name, price) VALUES (?, ?)",
+			statement = conn.prepareStatement("INSERT INTO tests (name, price) VALUES (?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
 			statement.setString(1, test.getName());
 			statement.setInt(2, test.getPrice());
@@ -150,7 +151,7 @@ public class DBManager {
 
 	public int addRooms(Room room) {
 		try {
-			PreparedStatement statement = conn.prepareStatement("INSERT INTO rooms (capacity) VALUES (?)",
+			statement = conn.prepareStatement("INSERT INTO rooms (capacity) VALUES (?)",
 					Statement.RETURN_GENERATED_KEYS);
 			statement.setInt(1, room.getCapacity());
 
@@ -182,7 +183,7 @@ public class DBManager {
 
 	public int addBeds(Bed bed) {
 		try {
-			PreparedStatement statement = conn.prepareStatement("INSERT INTO beds (roomID, price) VALUES (?, ?)",
+			statement = conn.prepareStatement("INSERT INTO beds (roomID, price) VALUES (?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
 			statement.setInt(1, bed.getRoomID());
 			statement.setInt(2, bed.getPrice());
@@ -215,7 +216,7 @@ public class DBManager {
 
 	public int addAppointment(Appointment appointment) {
 		try {
-			PreparedStatement statement = conn.prepareStatement(
+			statement = conn.prepareStatement(
 					"INSERT INTO appointments (patientID, doctorID, timeStart, timeEnd) VALUES (?, ?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
 			statement.setString(1, appointment.getPatientID());
@@ -250,7 +251,7 @@ public class DBManager {
 
 	public int addCheckup(Checkup checkup) {
 		try {
-			PreparedStatement statement = conn.prepareStatement(
+			statement = conn.prepareStatement(
 					"INSERT INTO checkups (patientID, testID, timeStart, timeEnd) VALUES (?, ?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
 			statement.setString(1, checkup.getPatientID());
@@ -285,7 +286,7 @@ public class DBManager {
 
 	public int addStay(Stay stay) {
 		try {
-			PreparedStatement statement = conn.prepareStatement(
+			statement = conn.prepareStatement(
 					"INSERT INTO stays (patientID, bedID, timeStart, timeEnd) VALUES (?, ?, ?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
 			statement.setString(1, stay.getPatientID());
@@ -320,7 +321,7 @@ public class DBManager {
 
 	public Appointment getAppointment(String patientId) {
 		try {
-			PreparedStatement statement = conn.prepareStatement(
+			statement = conn.prepareStatement(
 					"SELECT * FROM patients p, appointments a WHERE p.patientID = ? and p.patientID = a.patientID");
 			statement.setString(1, patientId);
 
@@ -348,7 +349,7 @@ public class DBManager {
 
 	public Patient getPatient(String patientID) {
 		try {
-			PreparedStatement statement = conn.prepareStatement("SELECT * FROM patients WHERE patientID = ?");
+			statement = conn.prepareStatement("SELECT * FROM patients WHERE patientID = ?");
 			statement.setString(1, patientID);
 
 			try (ResultSet resultSet = statement.executeQuery()) {
@@ -372,7 +373,7 @@ public class DBManager {
 
 	public Doctor getDoctor(int doctorID) {
 		try {
-			PreparedStatement statement = conn.prepareStatement("SELECT * FROM doctors WHERE doctorID = ?");
+			statement = conn.prepareStatement("SELECT * FROM doctors WHERE doctorID = ?");
 			statement.setInt(1, doctorID);
 
 			try (ResultSet resultSet = statement.executeQuery()) {
@@ -398,7 +399,7 @@ public class DBManager {
 
 	public Test getTest(int testID) {
 		try {
-			PreparedStatement statement = conn.prepareStatement("SELECT * FROM tests WHERE testID = ?");
+			statement = conn.prepareStatement("SELECT * FROM tests WHERE testID = ?");
 			statement.setInt(1, testID);
 
 			try (ResultSet resultSet = statement.executeQuery()) {
@@ -423,7 +424,7 @@ public class DBManager {
 
 	public Bed getBed(int bedID) {
 		try {
-			PreparedStatement statement = conn.prepareStatement("SELECT * FROM beds WHERE bedID = ?");
+			statement = conn.prepareStatement("SELECT * FROM beds WHERE bedID = ?");
 			statement.setInt(1, bedID);
 
 			try (ResultSet resultSet = statement.executeQuery()) {
@@ -445,10 +446,68 @@ public class DBManager {
 		}
 		return null;
 	}
+	
+	public List<Booking> getBookings(String startTime, String endTime) {
+		try {
+			statement = conn.prepareStatement("SELECT  *, '진료' as Source\n" + 
+					"FROM appointments\n" + 
+					"where hasPaid = 0 and ? <= timeStart and timeEnd <= ?\n" + 
+					"UNION\n" + 
+					"SELECT *, '검사' as Source\n" + 
+					"FROM checkups \n" + 
+					"where hasPaid = 0  and ? <= timeStart and timeEnd <= ?\n" + 
+					"UNION\n" + 
+					"SELECT *, '입원' as Source\n" + 
+					"FROM checkups \n" + 
+					"where hasPaid = 0  and ? <= timeStart and timeEnd <= ?;");
+			statement.setString(1, startTime);
+			statement.setString(2, endTime);
+			statement.setString(3, startTime);
+			statement.setString(4, endTime);
+			statement.setString(5, startTime);
+			statement.setString(6, endTime);
 
+			try (ResultSet resultSet = statement.executeQuery()) {
+
+				List<Booking> bookings = new ArrayList<Booking>();
+
+				while (resultSet.next()) {
+					String bookingType = resultSet.getString("Source");
+
+					// getting attributes for all bookings
+					int bookingID = resultSet.getInt(1);
+					String patientID = resultSet.getString("patientID");
+					int resourceID = resultSet.getInt(3);
+					String timeStart = resultSet.getString("timeStart");
+					String timeEnd = resultSet.getString("timeEnd");
+					int hasPaid = resultSet.getInt("hasPaid");
+
+					if (bookingType.equals("진료")) {
+						Appointment appointment = new Appointment(bookingID, patientID, resourceID, timeStart, timeEnd,
+								hasPaid);
+						bookings.add((Booking) appointment);
+					} else if (bookingType.equals("검사")) {
+						Checkup checkup = new Checkup(bookingID, patientID, resourceID, timeStart, timeEnd, hasPaid);
+						bookings.add((Booking) checkup);
+					} else if (bookingType.equals("입원")) {
+						Stay stay = new Stay(bookingID, patientID, resourceID, timeStart, timeEnd, hasPaid);
+						bookings.add((Booking) stay);
+					}
+				}
+				return bookings;
+			}
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public List<Booking> getBookings(String patientID) {
 		try {
-			PreparedStatement statement = conn.prepareStatement("SELECT  *, '진료' as Source\n" + "FROM appointments\n"
+			statement = conn.prepareStatement("SELECT  *, '진료' as Source\n" + "FROM appointments\n"
 					+ "where hasPaid = 0 and patientID = ?\n" + "union \n" + "SELECT *, '검사' as Source\n"
 					+ "FROM checkups \n" + "where hasPaid = 0 and patientID = ?\n" + "union\n"
 					+ "SELECT *, '입원' as Source\n" + "FROM stays \n" + "where hasPaid = 0 and patientID = ?;");
@@ -493,6 +552,7 @@ public class DBManager {
 		}
 		return null;
 	}
+	
 
 	public List<Booking> printBookings(String patientID) {
 		List<Booking> bookings = getBookings(patientID);
@@ -588,6 +648,17 @@ public class DBManager {
 		}
 		return false;
 	}
+	
+	public void disconnectDb() {
+        try {
+            statement.close();
+            conn.close();
+            log("\n=======Database Connection Closed=======\n");
+        } catch(Exception sqlException) {
+            sqlException.printStackTrace();
+        }
+    }
+	
 
 	public static void log(String string) {
 		System.err.println(string);
