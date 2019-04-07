@@ -1,4 +1,4 @@
-package hostpital.input;
+package hospital.input;
 
 public class StringChecker {
 

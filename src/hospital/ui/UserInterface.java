@@ -1,6 +1,6 @@
-package hospital.UI;
+package hospital.ui;
 
-import hospital.UI.*;
+import hospital.ui.*;
 
 public class UserInterface {
 

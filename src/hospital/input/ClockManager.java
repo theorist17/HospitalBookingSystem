@@ -1,4 +1,4 @@
-package hostpital.input;
+package hospital.input;
 
 import java.util.Calendar;
 import java.util.Date;

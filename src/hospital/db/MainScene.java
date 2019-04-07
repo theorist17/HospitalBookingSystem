@@ -3,14 +3,14 @@ package hospital.db;
 import java.util.List;
 import java.util.Scanner;
 
-import hospital.UI.UserInterface;
 import hospital.data.Appointment;
 import hospital.data.Booking;
 import hospital.data.Checkup;
 import hospital.data.Patient;
 import hospital.data.Stay;
-import hostpital.input.ClockManager;
-import hostpital.input.StringChecker;
+import hospital.input.ClockManager;
+import hospital.input.StringChecker;
+import hospital.ui.UserInterface;
 
 public class MainScene {
 	DBManager dbManager;

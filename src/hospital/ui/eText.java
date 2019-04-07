@@ -1,4 +1,4 @@
-package hospital.UI;
+package hospital.ui;
 
 public enum eText{
    //MAIN : Main 화면에서 사용 하기 위한 텍스트
