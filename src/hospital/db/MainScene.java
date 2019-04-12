@@ -114,30 +114,30 @@ public class MainScene {
 					String timeStart = ClockManager.clockDiag(word[3]);
 					String timeEnd = ClockManager.addHour(timeStart);
 
-					//환자 확인
+					// 환자 확인
 					Patient patient = dbManager.getPatient(patientID);
-					if (patient == null || !patient.getName().equals(patientName))	// 조회불가능 - 초진, 잘못된 입력, ..
+					if (patient == null || !patient.getName().equals(patientName)) // 조회불가능 - 초진, 잘못된 입력, ..
 						dbManager.addPatient(new Patient(patientID, patientName));
-					
+
 					// 환자 자신이 (입력한 시간에) 진료/검사를 이미 예약해 둔 경우 배제 (중복예약)
 					List<Booking> bookings = dbManager.getBookings(patientID);
-					bookings.removeIf(booking -> booking instanceof Stay); //입원과는 겹쳐도 되므로 제거
-					if(ClockManager.isOverlapped(bookings, timeStart, timeEnd)) {
+					bookings.removeIf(booking -> booking instanceof Stay); // 입원과는 겹쳐도 되므로 제거
+					if (ClockManager.isOverlapped(bookings, timeStart, timeEnd)) {
 						UserInterface.getInstance().printTimeOverlapError();
 						return goMainMenu();
 					}
-					
+
 					// 모든 환자가 (입력한 시간에) (입력한 의사번호로) 진료/검사를 이미 예약해 둔 경우 배제 (선점된 예약)
 					bookings = dbManager.getBookings(timeStart, timeEnd);
-					if(ClockManager.isOverlapped(bookings, timeStart, timeEnd, "Appointment", doctorID)) {
+					if (ClockManager.isOverlapped(bookings, timeStart, timeEnd, "Appointment", doctorID)) {
 						UserInterface.getInstance().printTimeOverlapError();
 						return goMainMenu();
 					}
-					
+
 					// 입력된 진료예약정보 등록
-					if(dbManager.addAppointment(new Appointment(patientID, doctorID, timeStart, timeEnd, 0))>0)
+					if (dbManager.addAppointment(new Appointment(patientID, doctorID, timeStart, timeEnd, 0)) > 0)
 						System.out.println("진료예약이 완료되었습니다.");
-					
+
 					return goMainMenu();
 				} else {
 					UserInterface.getInstance().printInputError();
@@ -156,36 +156,35 @@ public class MainScene {
 					String timeStart = ClockManager.clockDiag(word[3]);
 					String timeEnd = ClockManager.addHour(timeStart);
 
-					
-
-					//환자 확인
+					// 환자 확인
 					Patient patient = dbManager.getPatient(patientID);
-					if (patient == null ) {	
+					if (patient == null) {
 						UserInterface.getInstance().printVisitError();
 						return goMainMenu();
 					} else if (!patient.getName().equals(patientName)) {
 						UserInterface.getInstance().printInputError();
 						return goMainMenu();
-					} 										
-					
+					}
+
 					// 환자 자신이 입력한 시간에 진료/검사를 이미 예약해 둔 경우 배제 (중복예약)
-					List<Booking> bookings = dbManager.getBookings(patientID); //한 환자의 예약
-					bookings.removeIf(booking -> booking instanceof Stay); //입원과 겹쳐도 되므로 제거
-					if(ClockManager.isOverlapped(bookings, timeStart, timeEnd)) {
+					List<Booking> bookings = dbManager.getBookings(patientID); // 한 환자의 예약
+					bookings.removeIf(booking -> booking instanceof Stay); // 입원과 겹쳐도 되므로 제거
+					if (ClockManager.isOverlapped(bookings, timeStart, timeEnd)) {
 						UserInterface.getInstance().printTimeOverlapError();
 						return goMainMenu();
 					}
-					
+
 					// 모든 환자가 (입력한 시간에) (입력한 검사번호로) 진료/검사를 이미 예약해 둔 경우 배제 (선점된 예약)
-					bookings = dbManager.getBookings(timeStart, timeEnd); //모든 환자의 예약
-					if(ClockManager.isOverlapped(bookings, timeStart, timeEnd, "Checkup", testID)) { // Checkup 중에 매칭 찾기 
+					bookings = dbManager.getBookings(timeStart, timeEnd); // 모든 환자의 예약
+					if (ClockManager.isOverlapped(bookings, timeStart, timeEnd, "Checkup", testID)) { // Checkup 중에 매칭
+																										// 찾기
 						UserInterface.getInstance().printTimeOverlapError();
 						return goMainMenu();
 					}
-					
-					if(dbManager.addCheckup(new Checkup(patientID, testID, timeStart, timeEnd, 0))>0)
+
+					if (dbManager.addCheckup(new Checkup(patientID, testID, timeStart, timeEnd, 0)) > 0)
 						System.out.println("검사예약이 완료되었습니다.");
-					
+
 					return goMainMenu();
 				} else {
 					UserInterface.getInstance().printInputError();
@@ -203,45 +202,48 @@ public class MainScene {
 					int bedID = Integer.parseInt(word[2]);
 					String timeStart = ClockManager.clockDiag(word[3]);
 					String timeEnd = ClockManager.clockDiag(word[4]);
-					if (timeStart.compareTo(timeEnd)>0) {
-						UserInterface.getInstance().printInputError(); // 시간 뒤바뀜 
+					if (timeStart.compareTo(timeEnd) > 0) {
+						UserInterface.getInstance().printInputError(); // 시간 뒤바뀜
 						return goMainMenu();
 					}
-						
-					//환자 확인
+
+					// 환자 확인
 					Patient patient = dbManager.getPatient(patientID);
-					if (patient == null ) {	
+					if (patient == null) {
 						UserInterface.getInstance().printVisitError();
 						return goMainMenu();
 					} else if (!patient.getName().equals(patientName)) {
 						UserInterface.getInstance().printInputError();
 						return goMainMenu();
-					} 										
-					
+					}
+
 					// 환자 자신이 입력한 시간에 진료/검사를 이미 예약해 둔 경우 배제 (중복예약)
-					List<Booking> bookings = dbManager.getBookings(patientID); //한 환자의 예약
-					bookings.removeIf(booking -> booking instanceof Appointment|booking instanceof Checkup); // 진료/검사 겹쳐도 되므로 제거
-					if(ClockManager.isOverlapped(bookings, timeStart, timeEnd)) {
+					List<Booking> bookings = dbManager.getBookings(patientID); // 한 환자의 예약
+					bookings.removeIf(booking -> booking instanceof Appointment | booking instanceof Checkup); // 진료/검사
+																												// 겹쳐도
+																												// 되므로
+																												// 제거
+					if (ClockManager.isOverlapped(bookings, timeStart, timeEnd)) {
 						UserInterface.getInstance().printTimeOverlapError();
 						return goMainMenu();
 					}
-					
+
 					// 모든 환자가 (입력한 시간에) (입력한 침대번호로) 진료/검사를 이미 예약해 둔 경우 배제 (선점된 예약)
-					bookings = dbManager.getBookings(timeStart, timeEnd); //모든 환자의 예약
-					if(ClockManager.isOverlapped(bookings, timeStart, timeEnd, "Stay", bedID)) {
+					bookings = dbManager.getBookings(timeStart, timeEnd); // 모든 환자의 예약
+					if (ClockManager.isOverlapped(bookings, timeStart, timeEnd, "Stay", bedID)) {
 						UserInterface.getInstance().printTimeOverlapError();
 						return goMainMenu();
 					}
-					
-					if(dbManager.addStay(new Stay(patientID, bedID, timeStart, timeEnd, 0))>0)
+
+					if (dbManager.addStay(new Stay(patientID, bedID, timeStart, timeEnd, 0)) > 0)
 						System.out.println("입원예약이 완료되었습니다.");
-					
+
 					return goMainMenu();
 				} else {
 					UserInterface.getInstance().printInputError();
 					return goMainMenu();
 				}
-				
+
 			}
 		} else {
 			UserInterface.getInstance().printMainError();
@@ -260,7 +262,7 @@ public class MainScene {
 			String patientID = word[1];
 			// 환자의 이름과 주민번호 DB에서 찾아보기
 			if (dbManager.getPatient(patientID).getName().equals(patientName)) {
-				dbManager.printBookings(patientID);
+				dbManager.printBookings(dbManager.getBookings(patientID));
 			} else {
 				UserInterface.getInstance().printInputError();
 			}
@@ -278,14 +280,14 @@ public class MainScene {
 			// 환자의 이름과 주민번호 DB에서 찾아보기
 			List<Booking> bookings = null;
 			if (dbManager.getPatient(patientID).getName().equals(patientName)) {
-				bookings = dbManager.printBookings(patientID);
+				bookings = dbManager.printBookings(dbManager.getBookings(patientID));
 			} else {
 				UserInterface.getInstance().printInputError();
 			}
 			System.out.println("삭제하실 예약의 번호를 입력하세요.");
 			String lineNumber = this.scan.nextLine();
 			if (StringChecker.cancelAppoint(lineNumber)) {
-				if (dbManager.deleteBooking(patientID, bookings.get(Integer.parseInt(lineNumber) - 1))) {
+				if (dbManager.deleteBooking(bookings.get(Integer.parseInt(lineNumber) - 1))) {
 					System.out.println("삭제완료되었습니다.");
 				} else {
 					// UserInterface.getInstance().printInputError(); //DB의 삭제연산 오류
@@ -305,14 +307,23 @@ public class MainScene {
 		UserInterface.getInstance().printAppointPatient();
 		String patientLine = this.scan.nextLine();
 		if (StringChecker.checkPersonalNum(patientLine)) {
-			Patient patient = dbManager.getPatient(patientLine.split("\\/")[1]);
-			dbManager.printBookings(patient.getPatientId());
+			String[] word = patientLine.split("\\/");
+			String patientName = word[0];
+			String patientID = word[1];
+			// 환자의 이름과 주민번호 DB에서 찾아보기
+			List<Booking> bookings = null;
+			if (dbManager.getPatient(patientID).getName().equals(patientName)) {
+				bookings = dbManager.printBookings(dbManager.getBookings(patientID));
+			} else {
+				UserInterface.getInstance().printInputError();
+			}
 			System.out.println("수납하실 예약의 번호를 입력하세요.");
-			String num = this.scan.nextLine();
-			if (StringChecker.payment(num)) {
-				dbManager.setBookingHasPaid(patient, dbManager.getBookings(patient.getPatientId()),
-						Integer.parseInt(num));
-				System.out.println("수납완료되었습니다.");
+			String lineNumber = this.scan.nextLine();
+			if (StringChecker.payment(lineNumber)) {
+				if(dbManager.setBookingHasPaid(bookings.get(Integer.parseInt(lineNumber)-1)))
+					System.out.println("수납완료되었습니다.");
+//				else 
+//					// DB오류
 				return goMainMenu();
 			}
 		} // stringcheck
@@ -375,6 +386,14 @@ public class MainScene {
 		System.out.println("조회할 방번호를 입력하세요.");
 		String input = this.scan.nextLine();
 		if (StringChecker.lookupBed(input)) {
+			for(int i=1;i<=20;i++) {
+				if(i==Integer.parseInt(input)) {
+					//room
+					return goMainMenu();
+				}
+			}return goMainMenu();
+			/*
+			
 			switch (Integer.parseInt(input)) {
 			case 1:
 				// Room Room=new Room();
@@ -439,7 +458,7 @@ public class MainScene {
 				return goMainMenu();
 			default:
 				return goMainMenu();
-			}
+			}*/
 		} else {
 			System.out.println("1~20 사이 정수를 입력하세요.");
 			return goMainMenu();

@@ -59,9 +59,7 @@ public class DBManager {
 
 	public String addPatient(Patient patient) {
 		try {
-			statement = conn.prepareStatement("INSERT INTO patients (patientID, name) VALUES (?, ?)");
-			statement.setString(1, patient.getPatientId());
-			statement.setString(2, patient.getName());
+			 
 
 			int affectedRows = statement.executeUpdate();
 
@@ -149,7 +147,7 @@ public class DBManager {
 		return -1;
 	}
 
-	public int addRooms(Room room) {
+	public int addRoom(Room room) {
 		try {
 			statement = conn.prepareStatement("INSERT INTO rooms (capacity) VALUES (?)",
 					Statement.RETURN_GENERATED_KEYS);
@@ -181,7 +179,7 @@ public class DBManager {
 		return -1;
 	}
 
-	public int addBeds(Bed bed) {
+	public int addBed(Bed bed) {
 		try {
 			statement = conn.prepareStatement("INSERT INTO beds (roomID, price) VALUES (?, ?)",
 					Statement.RETURN_GENERATED_KEYS);
@@ -317,34 +315,6 @@ public class DBManager {
 			e.printStackTrace();
 		}
 		return -1;
-	}
-
-	public Appointment getAppointment(String patientId) {
-		try {
-			statement = conn.prepareStatement(
-					"SELECT * FROM patients p, appointments a WHERE p.patientID = ? and p.patientID = a.patientID");
-			statement.setString(1, patientId);
-
-			try (ResultSet resultSet = statement.executeQuery()) {
-
-				Appointment appointment = null;
-				while (resultSet.next()) {
-					int appointmentId = resultSet.getInt("appointmentId");
-					patientId = resultSet.getString("patientId");
-					int doctorId = resultSet.getInt("doctorId");
-					String timeStart = resultSet.getString("timeStart");
-					String timeEnd = resultSet.getString("timeEnd");
-					appointment = new Appointment(appointmentId, patientId, doctorId, timeStart, timeEnd, 0);
-					return appointment;
-				}
-			}
-		} catch (SQLException e) {
-			System.err.println("SQLException: " + e.getMessage());
-			System.err.println("SQLState: " + e.getSQLState());
-			System.err.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-		return null;
 	}
 
 	public Patient getPatient(String patientID) {
@@ -554,8 +524,7 @@ public class DBManager {
 	}
 	
 
-	public List<Booking> printBookings(String patientID) {
-		List<Booking> bookings = getBookings(patientID);
+	public List<Booking> printBookings(List<Booking> bookings) {
 		for (int i = 0; i < bookings.size(); i++) {
 			if (bookings.get(i) instanceof Appointment) {
 				Appointment appointment = (Appointment) bookings.get(i);
@@ -576,30 +545,27 @@ public class DBManager {
 		return bookings;
 	}
 
-	public boolean setBookingHasPaid(Patient patient, List<Booking> bookings, int lineNo) {
+	public boolean setBookingHasPaid(Booking booking) {
 		try {
 			PreparedStatement statement = null;
-			if (bookings.get(lineNo - 1) instanceof Appointment) {
-				Appointment appointment = (Appointment) bookings.get(lineNo - 1);
-				statement = conn.prepareStatement("UPDATE appointments SET hasPaid=1 WHERE appointmentID=?;",
-						Statement.RETURN_GENERATED_KEYS);
+			if (booking instanceof Appointment) {
+				Appointment appointment = (Appointment) booking;
+				statement = conn.prepareStatement("UPDATE appointments SET hasPaid=1 WHERE appointmentID=?;");
 				statement.setInt(1, appointment.getAppointmentID());
-			} else if (bookings.get(lineNo - 1) instanceof Checkup) {
-				Checkup checkup = (Checkup) bookings.get(lineNo - 1);
-				statement = conn.prepareStatement("UPDATE checkups SET hasPaid=1 WHERE checkupID=?;",
-						Statement.RETURN_GENERATED_KEYS);
+			} else if (booking instanceof Checkup) {
+				Checkup checkup = (Checkup) booking;
+				statement = conn.prepareStatement("UPDATE checkups SET hasPaid=1 WHERE checkupID=?;");
 				statement.setInt(1, checkup.getCheckupID());
-			} else if (bookings.get(lineNo - 1) instanceof Stay) {
-				Stay stay = (Stay) bookings.get(lineNo - 1);
-				statement = conn.prepareStatement("UPDATE stays SET hasPaid=1 WHERE stayID=?;",
-						Statement.RETURN_GENERATED_KEYS);
+			} else if (booking instanceof Stay) {
+				Stay stay = (Stay) booking;
+				statement = conn.prepareStatement("UPDATE stays SET hasPaid=1 WHERE stayID=?;");
 				statement.setInt(1, stay.getStayID());
 			}
 
 			int affectedRows = statement.executeUpdate();
 
 			if (affectedRows == 1) {
-				bookings.get(lineNo - 1).setHasPaid(1);
+				booking.setHasPaid(1);
 				return true;
 			} else {
 				throw new SQLException("UPDATE haspaid failed, no rows affected.");
@@ -614,7 +580,7 @@ public class DBManager {
 		return false;
 	}
 
-	boolean deleteBooking(String patientID, Booking booking) {
+	boolean deleteBooking(Booking booking) {
 
 		try {
 			PreparedStatement statement = null;
@@ -660,7 +626,7 @@ public class DBManager {
     }
 	
 
-	public static void log(String string) {
+	public void log(String string) {
 		System.err.println(string);
 	}
 }

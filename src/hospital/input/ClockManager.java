@@ -78,7 +78,7 @@ public class ClockManager {
 		
 		try {
 			Date newStart = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(entryStart);
-			Date newEnd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(entryEnd);
+			Date newEnd = new SimpleDateFormat("yyyy-MM-dd HwH:mm:ss").parse(entryEnd);
 			for (int i = 0; i < bookings.size(); i++) {
 				Booking booking = bookings.get(i);
 				String pacakgeClassName = booking.getClass().getName(); // 예약의 객체의 자료형 조사 ; Appointment/Checkup/Stay 중
