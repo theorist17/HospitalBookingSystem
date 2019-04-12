@@ -2,6 +2,14 @@ package hospital.input;
 
 public class StringChecker {
 
+	public static boolean checkOneTwo(String oneThree) {// 1~2 check
+		if (!oneThree.matches("^[1-2]{1}$")) {
+			// UIManagerError
+			return false;
+		}
+		return true;
+	}
+	
 	public static boolean checkOneThree(String oneThree) {// 1~3 check
 		if (!oneThree.matches("^[1-3]{1}$")) {
 			// UIManagerError

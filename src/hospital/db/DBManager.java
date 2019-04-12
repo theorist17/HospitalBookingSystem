@@ -615,6 +615,28 @@ public class DBManager {
 		return false;
 	}
 	
+	public int getRandomDoctor(String timeStart, String timeEnd) {
+		try {
+			statement = conn.prepareStatement("CALL check_time(?, ?);");
+			statement.setString(1, timeStart);
+			statement.setString(2, timeEnd);
+
+			try (ResultSet resultSet = statement.executeQuery()) {
+				while (resultSet.next()) {
+					int i = resultSet.getInt(1);
+					System.out.println(i);
+				}
+			}
+			
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return -1;
+	}
+	
 	public void disconnectDb() {
         try {
             statement.close();

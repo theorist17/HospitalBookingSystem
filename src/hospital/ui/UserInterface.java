@@ -44,9 +44,20 @@ public class UserInterface {
 		this.printTextWithKey(eText.Patient_Menu3);
 	}
 
+	public void printAppointmentMenu() {
+		this.printTextWithKey(eText.Appointment_Menu1);
+		this.printTextWithKey(eText.Appointment_Menu2);
+	}
+	
 	public void printDoctorInformation() {
 		this.printTextWithKey(eText.Doctor_information);
 		this.printTextWithKey(eText.Patient_Menu1_Information);
+	}
+
+	public void printDepartmentInformation() {
+		this.printTextWithKey(eText.Department_information);
+		this.printTextWithKey(eText.Department_Menu1_Information);
+
 	}
 
 	public void printCheckUpInformation() {
@@ -79,6 +90,9 @@ public class UserInterface {
 		this.printTextWithKey(eText.MENU2_RESULT_4);
 	}
 
+	public void printAppointmentError() {
+		this.printTextWithKey(eText.Appointment_ERROR);
+	}
 	public void printDoctorError() {
 		this.printTextWithKey(eText.MENU2_ERROR);
 	}
@@ -89,6 +103,10 @@ public class UserInterface {
 
 	public void printTimeOverlapError() {
 		this.printTextWithKey(eText.TimeOverlap_Error);
+	}
+
+	public void printDepartmentError() {
+		this.printTextWithKey(eText.Department_Error);
 	}
 
 	/*
