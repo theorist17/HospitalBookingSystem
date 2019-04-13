@@ -30,7 +30,13 @@ public enum eText{
       
       Doctor_information("의사정보입니다."+"\n"+"1. 안과,안철수,의사번호 : 1"
             +"\n"+"2. 외과,김선경,의사번호 : 2"
-            +"\n"+"3. 내과,박찬모,의사번호 : 3"),
+            +"\n"+"3. 내과,박찬모,의사번호 : 3"
+            +"\n"+"4. 안과,차리서,의사번호 : 4"
+            +"\n"+"5. 외과,이국종,의사번호 : 5"
+            +"\n"+"6. 내과,나의사,의사번호 : 6"
+            +"\n"+"7. 외과,이재마,의사번호 : 7"
+            +"\n"+"8. 내과,돌팔이,의사번호 : 8"
+            +"\n"+"9. 외과,허주운,의사번호 : 9"),
       Patient_Menu1_Information("이름/주민번호/의사번호/시작시간 순으로 입력하세요."),
       Department_information("진료과 정보입니다."+"\n"+"1. 안과 : 1"
               +"\n"+"2. 외과 : 2"
@@ -47,7 +53,8 @@ public enum eText{
       Input_Error("올바르지 않은 입력입니다."),
       FirstVisit_Error("초진의 경우 진료예약만 가능합니다."),
       TimeOverlap_Error("시간이 겹쳤습니다."),
-      Department_Error("해당 과에 시간이 겹쳤습니다.");
+      Department_Error("해당 과에 시간이 겹쳤습니다."),
+      DepartmentLast_Error("해당 시간에 가능한 대체의사가 없습니다.");
          ;      
 	
 	final private String text;

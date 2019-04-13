@@ -1,11 +1,17 @@
 package hospital.db;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
+
 
 import hospital.data.Appointment;
 import hospital.data.Booking;
 import hospital.data.Checkup;
+import hospital.data.Doctor;
 import hospital.data.Patient;
 import hospital.data.Stay;
 import hospital.input.ClockManager;
@@ -219,9 +225,9 @@ public class MainScene {
 		if (StringChecker.checkOneTwo(input)) {
 			switch (Integer.parseInt(input)) {
 			case 1:
-				return goAppointmentMenu1();
+				return goChooseDoctor();
 			case 2:
-				return goAppointmentMenu2();
+				return goChooseDepartment();
 			default:
 				UserInterface.getInstance().printAppointmentError();
 				return goMainMenu();
@@ -231,7 +237,7 @@ public class MainScene {
 			return goMainMenu();
 		}
 	}
-	private boolean goAppointmentMenu1() {
+	private boolean goChooseDoctor() {
 		UserInterface.getInstance().printDoctorInformation();
 		String diagnosis = "";
 		diagnosis = this.scan.nextLine();
@@ -247,7 +253,164 @@ public class MainScene {
 			// 환자 확인
 			Patient patient = dbManager.getPatient(patientID);
 			if (patient == null || !patient.getName().equals(patientName)) // 조회불가능 - 초진, 잘못된 입력, ..
-				dbManager.addPatient(new Patient(patientID, patientName));
+				dbManager.addPatient(new Patient(patientID, patientName, 0));
+
+			// 예약을 하려는 이가 의사인지 확인 doctor == null 이면 환자
+			Doctor doctor = dbManager.getDoctor(patientID);
+			
+			// 해당 시간대에 근무 중인 의사
+			List<Doctor> workingDoctors = dbManager.getWorkingDoctors(timeStart, timeEnd, dbManager.getDoctor(doctorID).getDepartment());
+
+			// 목표 진료과에 모든 가능한 근무시간대의 의사 중에서 진료과지정예약 없는 한가한 의사 찾기 
+			List<Doctor> availDoctors = new ArrayList<Doctor>();
+			for (int i = 0 ; i < workingDoctors.size(); i++) {
+				List<Booking> doctorSchedule = dbManager.getAppointments(workingDoctors.get(i).getDoctorId()); // 각 의사의 일정 
+				if(!ClockManager.isOverlapped(doctorSchedule, timeStart, timeEnd)) // 그 의사의 일정과 입력이 겹침	
+					availDoctors.add(workingDoctors.get(i));
+			}
+			
+			// 5.1 이미 어떤 다른 환자가 자신을 지정해서 진료를 예약한 시간이거나, 진료과만 지정해서 예약했지만 그때 자신의 진료과에 자신 밖에 없는 시간이면, 그 시간 구간에는 자신은 진료받지 못합니. (일 우선)     
+			if(doctor != null) {
+				availDoctors.remove(doctor);
+				if(availDoctors.isEmpty()) {
+					UserInterface.getInstance().printDepartmentLastError();
+					return goMainMenu();
+				}
+			}
+			
+			// 5.2 이미 어떤 다른 환자가 진료과만 지정해서 예약했고 자신이 담당하기로 되었더라도, 그 시간에 다른 (같은 진료과의) 의사가 있고 스케쥴이 비어있으면 자신은 진료예약 할 수 있습니다.
+			List<PreparedStatement> updateQueries = null;
+			if(doctor != null) {
+				// 대체할 의사 찾기
+				List<Booking> schedules = dbManager.getAppointments(doctor.getDoctorId()); // 내 일정
+				updateQueries = dbManager.getSubDocQueries(schedules, timeStart, timeEnd, doctor.getDepartment(), doctor);
+				if (updateQueries == null) {// 의사의 모든 진료일정 다른 의사에게 넘기는 쿼
+					UserInterface.getInstance().printDepartmentError();
+					return goMainMenu();
+				} 
+			}
+			
+			// 5.3 자신이 진료를 받고있는 동안에는, 자신의 원래 진료시간이더라도 환자들은 그 시간 동안 그 의사에게 진료를 예약하지 못합니다. 
+			if (ClockManager.isOverlapped(dbManager.getAppointments(), timeStart, timeEnd, dbManager.getPatient(doctorID).getPatientId())) {
+				UserInterface.getInstance().printTimeOverlapError();
+				return goMainMenu();
+			}
+			
+			// 환자 자신이 (입력한 시간에) 진료/검사를 이미 예약해 둔 경우 배제 (중복예약)
+			List<Booking> bookings = dbManager.getBookings(patientID);
+			bookings.removeIf(booking -> booking instanceof Stay); // 입원과는 겹쳐도 되므로 제거
+			if (ClockManager.isOverlapped(bookings, timeStart, timeEnd)) {
+				UserInterface.getInstance().printTimeOverlapError();
+				return goMainMenu();
+			}
+
+			// 모든 환자가 (입력한 시간에) (입력한 의사번호로) 진료/검사를 이미 예약해 둔 경우 배제 (선점된 예약)
+			bookings = dbManager.getBookings(timeStart, timeEnd);
+			if (ClockManager.isOverlapped(bookings, timeStart, timeEnd, "Appointment", doctorID)) {
+				UserInterface.getInstance().printTimeOverlapError();
+				return goMainMenu();
+			}
+
+			try {
+				//대체 의사가 있으면 바꿔서 쿼리 실행
+				for (int i = 0; i < updateQueries.size(); i++) {
+					int affectedRow;
+					affectedRow = updateQueries.get(i).executeUpdate();
+					if (affectedRow == 0) {
+						throw new SQLException("UPDATE " + i + " failed, no rows affected.");
+					} else {
+						System.err.println("UPDATE " + i + " succeeded, 1 rows affected.");
+					}
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			
+			// 입력된 진료예약정보 등록
+			if (dbManager.addAppointment(new Appointment(patientID, doctorID, timeStart, timeEnd, 0)) > 0)
+				System.out.println("진료예약이 완료되었습니다.");
+
+			return goMainMenu();
+		} else {
+			UserInterface.getInstance().printInputError();
+			return goMainMenu();
+		}
+	}
+	private boolean goChooseDepartment() {
+		UserInterface.getInstance().printDepartmentInformation();;
+		String diagnosis = "";
+		diagnosis = this.scan.nextLine();
+
+		if (StringChecker.checkDiag2(diagnosis)) {
+			String[] word = diagnosis.split("\\/");
+			String patientName = word[0];
+			String patientID = word[1];
+			String deptName = null;
+			switch(Integer.parseInt(word[2])) {
+			case 1:
+				deptName = "안과";
+				break;
+			case 2:
+				deptName = "외과";
+				break;
+			case 3:
+				deptName = "내과";
+				break;
+			default:
+				break;
+			}
+			String timeStart = ClockManager.clockDiag(word[3]);
+			String timeEnd = ClockManager.addHour(timeStart);
+
+			// 환자 확인
+			Patient patient = dbManager.getPatient(patientID);
+			if (patient == null || !patient.getName().equals(patientName)) // 조회불가능 - 초진, 잘못된 입력, ..
+				dbManager.addPatient(new Patient(patientID, patientName, 0));
+			
+			// 예약을 하려는 이가 의사인지 확인 doctor == null 이면 환자
+			Doctor doctor = dbManager.getDoctor(patientID);
+			
+			// 해당 시간대에 근무 중인 의사
+			List<Doctor> workingDoctors = dbManager.getWorkingDoctors(timeStart, timeEnd, deptName); // 목표로 하는 진료과 의사들
+			
+			// 예약 없는 한가한 의사 찾기 
+			List<Doctor> availDoctors = new ArrayList<Doctor>();
+			for (int i = 0 ; i < workingDoctors.size(); i++) {
+				List<Booking> schedules = dbManager.getAppointments(workingDoctors.get(i).getDoctorId()); // 각 의사의 일정 
+				if(!ClockManager.isOverlapped(schedules, timeStart, timeEnd)) // 의사의 일정과 입력이 겹침	
+					availDoctors.add(workingDoctors.get(i));
+			}
+			
+			// 5.1 의사가 진료를 원하는데, 진료과만 지정해서 예약했지만 그때 자신의 진료과에 자신 밖에 없는 시간이면,
+			if(doctor != null) {
+				availDoctors.remove(doctor);
+				if(availDoctors.isEmpty()) {
+					UserInterface.getInstance().printDepartmentLastError();
+					return goMainMenu();
+				}
+			}
+			
+			// 5.2 이미 어떤 다른 환자가 진료과만 지정해서 예약했고 자신이 담당하기로 되었더라도, 그 시간에 다른 (같은 진료과의) 의사가 있고 스케쥴이 비어있으면 자신은 진료예약 할 수 있습니다.
+			List<PreparedStatement> updateQueries = null;
+			if(doctor != null) {
+				// 대체할 의사 찾기
+				List<Booking> schedules = dbManager.getAppointments(doctor.getDoctorId()); // 내 일정
+				updateQueries = dbManager.getSubDocQueries(schedules, timeStart, timeEnd, doctor.getDepartment(), doctor);
+				if (updateQueries == null) {// 의사의 모든 진료일정 다른 의사에게 넘기는 쿼리
+					UserInterface.getInstance().printDepartmentError();
+					return goMainMenu();
+				} 
+			}
+			
+			// 5.3 자신이 진료를 받고있는 동안에는, 자신의 원래 진료시간이더라도 환자들은 그 시간 동안 그 의사에게 진료를 예약하지 못합니다. 
+			if (ClockManager.isOverlapped(dbManager.getAppointments(), timeStart, timeEnd, patientID)) {
+				UserInterface.getInstance().printTimeOverlapError();
+				return goMainMenu();
+			}
+
+			// 랜덤 의사 선택 & 의사 번호 지정
+			Random rand = new Random();
+			int doctorID = availDoctors.get(rand.nextInt(availDoctors.size())).getDoctorId();
 
 			// 환자 자신이 (입력한 시간에) 진료/검사를 이미 예약해 둔 경우 배제 (중복예약)
 			List<Booking> bookings = dbManager.getBookings(patientID);
@@ -264,54 +427,23 @@ public class MainScene {
 				return goMainMenu();
 			}
 
+			try {
+				//대체 의사가 있으면 바꿔서 쿼리 실행
+				for (int i = 0; i < updateQueries.size(); i++) {
+					int affectedRow;
+					affectedRow = updateQueries.get(i).executeUpdate();
+					if (affectedRow == 0) {
+						throw new SQLException("UPDATE " + i + " failed, no rows affected.");
+					} else {
+						System.err.println("UPDATE " + i + " succeeded, 1 rows affected.");
+					}
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			
 			// 입력된 진료예약정보 등록
 			if (dbManager.addAppointment(new Appointment(patientID, doctorID, timeStart, timeEnd, 0)) > 0)
-				System.out.println("진료예약이 완료되었습니다.");
-
-			return goMainMenu();
-		} else {
-			UserInterface.getInstance().printInputError();
-			return goMainMenu();
-		}
-	}
-	private boolean goAppointmentMenu2() {
-		UserInterface.getInstance().printDepartmentInformation();;
-		String diagnosis = "";
-		diagnosis = this.scan.nextLine();
-
-		if (StringChecker.checkDiag(diagnosis)) {
-			String[] word = diagnosis.split("\\/");
-			String patientName = word[0];
-			String patientID = word[1];
-			int departmentID = Integer.parseInt(word[2]);
-			String timeStart = ClockManager.clockDiag(word[3]);
-			String timeEnd = ClockManager.addHour(timeStart);
-
-			// 환자 확인
-			Patient patient = dbManager.getPatient(patientID);
-			if (patient == null || !patient.getName().equals(patientName)) // 조회불가능 - 초진, 잘못된 입력, ..
-				dbManager.addPatient(new Patient(patientID, patientName));
-			
-			// 의사 정보 가져오기
-			int randDocID = dbManager.getRandomDoctor(timeStart, timeEnd);
-
-			// 환자 자신이 (입력한 시간에) 진료/검사를 이미 예약해 둔 경우 배제 (중복예약)
-			List<Booking> bookings = dbManager.getBookings(patientID);
-			bookings.removeIf(booking -> booking instanceof Stay); // 입원과는 겹쳐도 되므로 제거
-			if (ClockManager.isOverlapped(bookings, timeStart, timeEnd)) {
-				UserInterface.getInstance().printTimeOverlapError();
-				return goMainMenu();
-			}
-
-			// 모든 환자가 (입력한 시간에) (입력한 의사번호로) 진료/검사를 이미 예약해 둔 경우 배제 (선점된 예약)
-			bookings = dbManager.getBookings(timeStart, timeEnd);
-			if (ClockManager.isOverlapped(bookings, timeStart, timeEnd, "Appointment", randDocID)) {
-				UserInterface.getInstance().printTimeOverlapError();
-				return goMainMenu();
-			}
-
-			// 입력된 진료예약정보 등록
-			if (dbManager.addAppointment(new Appointment(patientID, randDocID, timeStart, timeEnd, 0)) > 0)
 				System.out.println("진료예약이 완료되었습니다.");
 
 			return goMainMenu();

@@ -3,11 +3,13 @@ package hospital.data;
 public class Patient {
 	private String patientId;
 	private String name;
+	private int doctorID;
 	
-	public Patient(String patientId, String name) {
+	public Patient(String patientId, String name, int doctorID) {
 		super();
 		this.patientId = patientId;
 		this.name = name;
+		this.doctorID = doctorID;
 	}
 	
 	public String getPatientId() {
@@ -21,6 +23,14 @@ public class Patient {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public int getDoctorID() {
+		return doctorID;
+	}
+
+	public void setDoctorID(int doctorID) {
+		this.doctorID = doctorID;
 	}
 	
 }

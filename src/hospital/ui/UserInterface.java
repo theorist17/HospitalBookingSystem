@@ -108,6 +108,11 @@ public class UserInterface {
 	public void printDepartmentError() {
 		this.printTextWithKey(eText.Department_Error);
 	}
+	
+	public void printDepartmentLastError() {
+		this.printTextWithKey(eText.DepartmentLast_Error);
+	}
+
 
 	/*
 	 * 입력받은 eText 값에 매핑되어 있는 문자열을 출력하는 함수.

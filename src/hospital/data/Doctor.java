@@ -51,5 +51,22 @@ public class Doctor {
 	public void setPrice(int price) {
 		this.price = price;
 	}
+	
+	public boolean equals(Object object) {
+		if(object instanceof Doctor ) {
+			Doctor doctor = (Doctor) object;
+			if(!this.getDepartment().equals(doctor.getDepartment()))
+				return false;
+			if(this.getDoctorId() != doctor.getDoctorId())
+				return false;
+			if(!this.getName().equals(doctor.getName()))
+				return false;
+			if(this.getPrice() != doctor.getPrice())
+				return false;
+		}
+		
+		return true;
+		
+	}
 
 }

@@ -3,12 +3,22 @@ package hospital.data;
 public class Appointment extends Booking {
 	private int appointmentID;
 	private int doctorID;
+	private int onDept;
 
 	public Appointment(int appointmentID, String patientID, int doctorID, String timeStart, String timeEnd,
-			int hasPaid) {
+			int hasPaid, int onDept) {
 		super(patientID, timeStart, timeEnd, hasPaid);
 		this.appointmentID = appointmentID;
 		this.doctorID = doctorID;
+		this.onDept = onDept;
+	}
+
+	public int getOnDept() {
+		return onDept;
+	}
+
+	public void setOnDept(int onDept) {
+		this.onDept = onDept;
 	}
 
 	public Appointment(String patientID, int doctorID, String timeStart, String timeEnd, int hasPaid) {

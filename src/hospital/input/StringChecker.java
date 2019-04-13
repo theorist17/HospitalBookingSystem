@@ -26,10 +26,16 @@ public class StringChecker {
 		return true;
 	}
 
-	public static boolean checkDiag(String diag) {// 진료체크
+	public static boolean checkDiag(String diag) {// 진료-의사선택 체크
+		if (!diag.matches("[가-힣]{3}\\/[1-9]{1}[0-9]{12}\\/[1-9]{1}\\/[0-9]{10}")) {
+			// UImanagerError
+			return false;
+		}
+		return true;
+	}
+	public static boolean checkDiag2(String diag) {// 진료-진료과선택 체크
 		if (!diag.matches("[가-힣]{3}\\/[1-9]{1}[0-9]{12}\\/[1-3]{1}\\/[0-9]{10}")) {
 			// UImanagerError
-
 			return false;
 		}
 		return true;
