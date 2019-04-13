@@ -373,15 +373,15 @@ public class MainScene {
 			// 해당 시간대에 근무 중인 의사
 			List<Doctor> workingDoctors = dbManager.getWorkingDoctors(timeStart, timeEnd, deptName); // 목표로 하는 진료과 의사들
 			
-			// 예약 없는 한가한 의사 찾기 
+			// 목표 진료과에 모든 가능한 근무시간대의 의사 중에서 없는 한가한 의사 찾기 
 			List<Doctor> availDoctors = new ArrayList<Doctor>();
 			for (int i = 0 ; i < workingDoctors.size(); i++) {
-				List<Booking> schedules = dbManager.getAppointments(workingDoctors.get(i).getDoctorId()); // 각 의사의 일정 
-				if(!ClockManager.isOverlapped(schedules, timeStart, timeEnd)) // 의사의 일정과 입력이 겹침	
+				List<Booking> doctorSchedule = dbManager.getAppointments(workingDoctors.get(i).getDoctorId()); // 각 의사의 일정 
+				if(!ClockManager.isOverlapped(doctorSchedule, timeStart, timeEnd)) // 그 의사의 일정과 입력이 겹침	
 					availDoctors.add(workingDoctors.get(i));
 			}
 			
-			// 5.1 의사가 진료를 원하는데, 진료과만 지정해서 예약했지만 그때 자신의 진료과에 자신 밖에 없는 시간이면,
+			// 5.1 이미 어떤 다른 환자가 자신을 지정해서 진료를 예약한 시간이거나, 진료과만 지정해서 예약했지만 그때 자신의 진료과에 자신 밖에 없는 시간이면, 그 시간 구간에는 자신은 진료받지 못합니. (일 우선)     
 			if(doctor != null) {
 				availDoctors.remove(doctor);
 				if(availDoctors.isEmpty()) {
