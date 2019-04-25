@@ -30,6 +30,7 @@ public class DBManager {
 	private PreparedStatement statement = null;
 
 	public void LoadDriver() {
+		//
 
 		try {
 			// The newInstance() call is a work around for some
