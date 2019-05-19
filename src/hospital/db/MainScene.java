@@ -493,13 +493,13 @@ public class MainScene {
 	   private boolean goDoctorMenu1() {
 	      System.out.println("진료목록을 조회할 의사번호를 입력하세요.");
 	      String input = this.scan.nextLine();
-	      if (StringChecker.checkOneThree(input)) {
+	      if (StringChecker.checkOneNine(input)) {
 	         // 의사의 의사번호를 통해서 DB에 접근하기
 	         dbManager.printBookings_for_doctor(dbManager.getBookings_for_appointment(Integer.parseInt(input)));
 	         //pause();
 	         return goMainMenu();   
 	      } else {
-	         UserInterface.getInstance().printMainError();
+	         UserInterface.getInstance().printMainError1();
 	         return goMainMenu();
 	      }
 

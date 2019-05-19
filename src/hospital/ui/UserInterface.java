@@ -26,6 +26,9 @@ public class UserInterface {
 	public void printMainError() {
 		this.printTextWithKey(eText.MAIN_ERROR);
 	}
+	public void printMainError1() {
+		this.printTextWithKey(eText.MAIN_ERROR1);
+	}
 
 	public void printPatientUI() {
 		this.printTextWithKey(eText.MENU1_RESULT_1);

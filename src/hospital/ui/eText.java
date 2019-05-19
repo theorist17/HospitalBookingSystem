@@ -7,12 +7,14 @@ public enum eText{
       MAIN_MENU_2("2. 의사"),
       MAIN_MENU_3("3. 종료하기"),
       MAIN_ERROR("[1,3]의 정수를 입력하세요."),
+      MAIN_ERROR1("[1,9]의 정수를 입력하세요."),
       
       MENU1_RESULT_1("1. 예약 등록"),
       MENU1_RESULT_2("2. 예약 조회"),
       MENU1_RESULT_3("3. 예약 취소"),
       MENU1_RESULT_4("4. 수납하기"),
       MENU1_ERROR("[1,4]의 정수를 입력하세요."),
+      MENU1_ERROR1("[1,9]의 정수를 입력하세요."),
 
       MENU2_RESULT_1("1. 진료 목록 조회"),
       MENU2_RESULT_2("2. 검사 목록 조회"),

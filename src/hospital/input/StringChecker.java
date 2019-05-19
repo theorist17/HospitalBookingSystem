@@ -25,6 +25,14 @@ public class StringChecker {
 		}
 		return true;
 	}
+	
+	public static boolean checkOneNine(String oneNine) {// 1~4 check
+		if (!oneNine.matches("^[1-9]{1}$")) {
+			// UIManagerError
+			return false;
+		}
+		return true;
+	}
 
 	public static boolean checkDiag(String diag) {// 진료-의사선택 체크
 		if (!diag.matches("[가-힣]{3}\\/[1-9]{1}[0-9]{12}\\/[1-9]{1}\\/[0-9]{10}")) {
