@@ -837,27 +837,18 @@ public class DBManager {
 		}
 		return null;
 	}
-	public List<Doctor> executeCheckDoctor(String timeStart, String timeEnd, int DoctorID) {
-		try {
-			
-			System.out.println("executeCheckTime");
-			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL doctor_available(?, ?, ?,?);");
-			statement = conn.prepareStatement("CALL doctor_available(?, ?, ?,?);");
-			statement.setString(1, timeStart);
-			statement.setString(2, timeEnd);
-			statement.setInt(3,DoctorID);
-			csmt.setString(1, timeStart);
-			csmt.setString(2, timeEnd);
-			csmt.setInt(3,DoctorID);
-			csmt.registerOutParameter(4, Types.BOOLEAN);
-			csmt.execute();
-			System.out.println(csmt.getBoolean(4));
-			if(csmt.getBoolean(4)) {
-				System.out.println("true");
-			}else
-				System.out.println("false");
-		
 
+	public List<Doctor> executeCheckDoctorAppoint(String javaPersonal, int javaDoctorID, String javaStart, String javaEnd, String javaDept, int checkDept, boolean result) {
+		try {
+			statement = conn.prepareStatement("CALL check_doctor_appoint(?, ?, ?, ?, ?, ?, @?);");
+			statement.setString(1, "9203221111111");
+			statement.setInt(2, 1);
+			statement.setString(3, "2019-05-18 09:00:00");
+			statement.setString(4, "2019-05-18 10:00:00");
+			statement.setString(5, "안과");
+			statement.setInt(6, 0);
+			statement.setInt(7, 0);
+	
 			try (ResultSet resultSet = statement.executeQuery()) {
 				List<Doctor> doctors = new ArrayList<Doctor>();
 				while (resultSet.next()) {
@@ -878,6 +869,45 @@ public class DBManager {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	public boolean executeDoctorWorkTime(String timeStart, String timeEnd, int DoctorID) {
+		try {
+			
+			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL doctor_workTime(?, ?, ?,?);");
+			csmt.setString(1, timeStart);
+			csmt.setString(2, timeEnd);
+			csmt.setInt(3,DoctorID);
+			csmt.registerOutParameter(4, Types.BOOLEAN);
+			csmt.execute();
+			return csmt.getBoolean(4);
+			
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public boolean executeDoctorAvailable(String timeStart, String timeEnd, int DoctorID) {
+		try {
+			
+			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL doctor_available(?, ?, ?,?);");
+			csmt.setString(1, timeStart);
+			csmt.setString(2, timeEnd);
+			csmt.setInt(3,DoctorID);
+			csmt.registerOutParameter(4, Types.BOOLEAN);
+			csmt.execute();
+			return csmt.getBoolean(4);
+			
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return false;
 	}
 	public List<Doctor> executeCheckFree_id(String timeStart, String timeEnd,int DoctorID, String deptName) {
 		try {
@@ -898,39 +928,6 @@ public class DBManager {
 			
 		
 
-			try (ResultSet resultSet = statement.executeQuery()) {
-				List<Doctor> doctors = new ArrayList<Doctor>();
-				while (resultSet.next()) {
-					int doctorID = resultSet.getInt("doctorID");
-					String name = resultSet.getString("name");
-					String department = resultSet.getString("department");
-					int price = resultSet.getInt("price");
-					
-					doctors.add(new Doctor(doctorID, name, department, price));
-				}
-				return doctors;
-			}
-			
-		} catch (SQLException e) {
-			System.err.println("SQLException: " + e.getMessage());
-			System.err.println("SQLState: " + e.getSQLState());
-			System.err.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	public List<Doctor> executeCheckDoctorAppoint(String javaPersonal, int javaDoctorID, String javaStart, String javaEnd, String javaDept, int checkDept, boolean result) {
-		try {
-			statement = conn.prepareStatement("CALL check_doctor_appoint(?, ?, ?, ?, ?, ?, @?);");
-			statement.setString(1, "9203221111111");
-			statement.setInt(2, 1);
-			statement.setString(3, "2019-05-18 09:00:00");
-			statement.setString(4, "2019-05-18 10:00:00");
-			statement.setString(5, "안과");
-			statement.setInt(6, 0);
-			statement.setInt(7, 0);
-	
 			try (ResultSet resultSet = statement.executeQuery()) {
 				List<Doctor> doctors = new ArrayList<Doctor>();
 				while (resultSet.next()) {

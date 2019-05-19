@@ -49,6 +49,7 @@ public class UserInterface {
 		this.printTextWithKey(eText.Appointment_Menu2);
 	}
 	
+	
 	public void printDoctorInformation() {
 		this.printTextWithKey(eText.Doctor_information);
 		this.printTextWithKey(eText.Patient_Menu1_Information);
@@ -111,6 +112,10 @@ public class UserInterface {
 	
 	public void printDepartmentLastError() {
 		this.printTextWithKey(eText.DepartmentLast_Error);
+	}
+	
+	public void printAppointmentResultError() {
+		this.printTextWithKey(eText.AppointmentResult_Error);
 	}
 
 

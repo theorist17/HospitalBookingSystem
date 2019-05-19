@@ -50,12 +50,18 @@ public enum eText{
       Bed_Information("침대위치/침대번호 출력"),
       Bed_InputInformation("이름/주민번호/침대번호/시작시간/종료시간 순으로 입력하세요."),
       Appointment_Patient("예약하신 환자의 이름/주민번호를 입력하세요."),
+      
+      
       Input_Error("올바르지 않은 입력입니다."),
       FirstVisit_Error("초진의 경우 진료예약만 가능합니다."),
       TimeOverlap_Error("시간이 겹쳤습니다."),
       Department_Error("해당 과에 시간이 겹쳤습니다."),
-      DepartmentLast_Error("해당 시간에 가능한 대체의사가 없습니다.");
-         ;      
+      DepartmentLast_Error("해당 시간에 가능한 대체의사가 없습니다."),
+      AppointmentResult_Error("진료예약에 실패하였습니다.")
+      
+      ;
+
+	
 	
 	final private String text;
 
