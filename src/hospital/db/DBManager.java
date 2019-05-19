@@ -672,106 +672,6 @@ public class DBManager {
 		return bookings;
 	}
 
-	public boolean setBookingHasPaid(Booking booking) {
-		try {
-			PreparedStatement statement = null;
-			if (booking instanceof Appointment) {
-				Appointment appointment = (Appointment) booking;
-				statement = conn.prepareStatement("UPDATE appointments SET hasPaid=1 WHERE appointmentID=?;");
-				statement.setInt(1, appointment.getAppointmentID());
-			} else if (booking instanceof Checkup) {
-				Checkup checkup = (Checkup) booking;
-				statement = conn.prepareStatement("UPDATE checkups SET hasPaid=1 WHERE checkupID=?;");
-				statement.setInt(1, checkup.getCheckupID());
-			} else if (booking instanceof Stay) {
-				Stay stay = (Stay) booking;
-				statement = conn.prepareStatement("UPDATE stays SET hasPaid=1 WHERE stayID=?;");
-				statement.setInt(1, stay.getStayID());
-			}
-
-			int affectedRows = statement.executeUpdate();
-
-			if (affectedRows == 1) {
-				booking.setHasPaid(1);
-				return true;
-			} else {
-				throw new SQLException("UPDATE haspaid failed, no rows affected.");
-			}
-
-		} catch (SQLException e) {
-			System.err.println("SQLException: " + e.getMessage());
-			System.err.println("SQLState: " + e.getSQLState());
-			System.err.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-		return false;
-	}
-
-	boolean deleteBooking(Booking booking) {
-
-		try {
-			PreparedStatement statement = null;
-
-			if (booking instanceof Appointment) {
-				Appointment appointment = (Appointment) booking;
-				statement = conn.prepareStatement("DELETE FROM appointments WHERE appointmentID = ?;");
-				statement.setInt(1, appointment.getAppointmentID());
-			} else if (booking instanceof Checkup) {
-				Checkup checkup = (Checkup) booking;
-				statement = conn.prepareStatement("DELETE FROM checkups WHERE checkupID = ?;");
-				statement.setInt(1, checkup.getCheckupID());
-			} else if (booking instanceof Stay) {
-				Stay stay = (Stay) booking;
-				statement = conn.prepareStatement("DELETE FROM stays WHERE stayID = ?;");
-				statement.setInt(1, stay.getStayID());
-			}
-
-			int affectedRows = statement.executeUpdate();
-
-			if (affectedRows == 1)
-				return true;
-			else
-				throw new SQLException("UPDATE haspaid failed, no rows affected.");
-
-		} catch (SQLException e) {
-			System.err.println("SQLException: " + e.getMessage());
-			System.err.println("SQLState: " + e.getSQLState());
-			System.err.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-		return false;
-	}
-	
-	public List<Doctor> getWorkingDoctors(String timeStart, String timeEnd, String deptName) {
-		try {
-			statement = conn.prepareStatement("CALL check_time(?, ?, ?);");
-			statement.setString(1, timeStart);
-			statement.setString(2, timeEnd);
-			statement.setString(3, deptName);
-
-			try (ResultSet resultSet = statement.executeQuery()) {
-				List<Doctor> doctors = new ArrayList<Doctor>();
-				while (resultSet.next()) {
-					int doctorID = resultSet.getInt("doctorID");
-					String name = resultSet.getString("name");
-					String department = resultSet.getString("department");
-					int price = resultSet.getInt("price");
-					
-					doctors.add(new Doctor(doctorID, name, department, price));
-				}
-				return doctors;
-			}
-			
-		} catch (SQLException e) {
-			System.err.println("SQLException: " + e.getMessage());
-			System.err.println("SQLState: " + e.getSQLState());
-			System.err.println("VendorError: " + e.getErrorCode());
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-
 	/**
 	 * 의사가 아파서 진료과지정으로 배정받은 환자진료예약을 다른 의사에 넘기는 쿼리를 준비하는 함(update)
 	 * @param bookings
@@ -807,7 +707,7 @@ public class DBManager {
 							
 						} else {
 							// 진료예약이 진료과지정이면 대체의사를 찾아본다.
-							List<Doctor> candiDoctors = getWorkingDoctors(appointment.getTimeStart(), appointment.getTimeEnd(), deptName);
+							List<Doctor> candiDoctors = executeCheckTime(appointment.getTimeStart(), appointment.getTimeEnd(), deptName);
 							candiDoctors.remove(lookingForSub);
 							if (candiDoctors.isEmpty())
 								return null;
@@ -835,6 +735,138 @@ public class DBManager {
 		return null;
 	}
 	
+	public boolean setBookingHasPaid(Booking booking) {
+		try {
+			PreparedStatement statement = null;
+			if (booking instanceof Appointment) {
+				Appointment appointment = (Appointment) booking;
+				statement = conn.prepareStatement("UPDATE appointments SET hasPaid=1 WHERE appointmentID=?;");
+				statement.setInt(1, appointment.getAppointmentID());
+			} else if (booking instanceof Checkup) {
+				Checkup checkup = (Checkup) booking;
+				statement = conn.prepareStatement("UPDATE checkups SET hasPaid=1 WHERE checkupID=?;");
+				statement.setInt(1, checkup.getCheckupID());
+			} else if (booking instanceof Stay) {
+				Stay stay = (Stay) booking;
+				statement = conn.prepareStatement("UPDATE stays SET hasPaid=1 WHERE stayID=?;");
+				statement.setInt(1, stay.getStayID());
+			}
+	
+			int affectedRows = statement.executeUpdate();
+	
+			if (affectedRows == 1) {
+				booking.setHasPaid(1);
+				return true;
+			} else {
+				throw new SQLException("UPDATE haspaid failed, no rows affected.");
+			}
+	
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	boolean deleteBooking(Booking booking) {
+	
+		try {
+			PreparedStatement statement = null;
+	
+			if (booking instanceof Appointment) {
+				Appointment appointment = (Appointment) booking;
+				statement = conn.prepareStatement("DELETE FROM appointments WHERE appointmentID = ?;");
+				statement.setInt(1, appointment.getAppointmentID());
+			} else if (booking instanceof Checkup) {
+				Checkup checkup = (Checkup) booking;
+				statement = conn.prepareStatement("DELETE FROM checkups WHERE checkupID = ?;");
+				statement.setInt(1, checkup.getCheckupID());
+			} else if (booking instanceof Stay) {
+				Stay stay = (Stay) booking;
+				statement = conn.prepareStatement("DELETE FROM stays WHERE stayID = ?;");
+				statement.setInt(1, stay.getStayID());
+			}
+	
+			int affectedRows = statement.executeUpdate();
+	
+			if (affectedRows == 1)
+				return true;
+			else
+				throw new SQLException("UPDATE haspaid failed, no rows affected.");
+	
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public List<Doctor> executeCheckTime(String timeStart, String timeEnd, String deptName) {
+		try {
+			statement = conn.prepareStatement("CALL check_time(?, ?, ?);");
+			statement.setString(1, timeStart);
+			statement.setString(2, timeEnd);
+			statement.setString(3, deptName);
+	
+			try (ResultSet resultSet = statement.executeQuery()) {
+				List<Doctor> doctors = new ArrayList<Doctor>();
+				while (resultSet.next()) {
+					int doctorID = resultSet.getInt("doctorID");
+					String name = resultSet.getString("name");
+					String department = resultSet.getString("department");
+					int price = resultSet.getInt("price");
+					
+					doctors.add(new Doctor(doctorID, name, department, price));
+				}
+				return doctors;
+			}
+			
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public List<Doctor> executeCheckDoctorAppoint(String javaPersonal, int javaDoctorID, String javaStart, String javaEnd, String javaDept, int checkDept, boolean result) {
+		try {
+			statement = conn.prepareStatement("CALL check_doctor_appoint(?, ?, ?, ?, ?, ?, @?);");
+			statement.setString(1, "9203221111111");
+			statement.setInt(2, 1);
+			statement.setString(3, "2019-05-18 09:00:00");
+			statement.setString(4, "2019-05-18 10:00:00");
+			statement.setString(5, "안과");
+			statement.setInt(6, 0);
+			statement.setInt(7, 0);
+	
+			try (ResultSet resultSet = statement.executeQuery()) {
+				List<Doctor> doctors = new ArrayList<Doctor>();
+				while (resultSet.next()) {
+					int doctorID = resultSet.getInt("doctorID");
+					String name = resultSet.getString("name");
+					String department = resultSet.getString("department");
+					int price = resultSet.getInt("price");
+					
+					doctors.add(new Doctor(doctorID, name, department, price));
+				}
+				return doctors;
+			}
+			
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	public void disconnectDb() {
         try {
             statement.close();

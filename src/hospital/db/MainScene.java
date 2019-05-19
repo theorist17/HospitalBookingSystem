@@ -259,7 +259,7 @@ public class MainScene {
 			Doctor doctor = dbManager.getDoctor(patientID);
 			
 			// 해당 시간대에 근무 중인 의사
-			List<Doctor> workingDoctors = dbManager.getWorkingDoctors(timeStart, timeEnd, dbManager.getDoctor(doctorID).getDepartment());
+			List<Doctor> workingDoctors = dbManager.executeCheckTime(timeStart, timeEnd, dbManager.getDoctor(doctorID).getDepartment());
 
 			// 목표 진료과에 모든 가능한 근무시간대의 의사 중에서 진료과지정예약 없는 한가한 의사 찾기 
 			List<Doctor> availDoctors = new ArrayList<Doctor>();
@@ -270,12 +270,15 @@ public class MainScene {
 			}
 			
 			// 5.1 이미 어떤 다른 환자가 자신을 지정해서 진료를 예약한 시간이거나, 진료과만 지정해서 예약했지만 그때 자신의 진료과에 자신 밖에 없는 시간이면, 그 시간 구간에는 자신은 진료받지 못합니. (일 우선)     
+			boolean success = false;
 			if(doctor != null) {
-				availDoctors.remove(doctor);
-				if(availDoctors.isEmpty()) {
-					UserInterface.getInstance().printDepartmentLastError();
-					return goMainMenu();
-				}
+//				availDoctors.remove(doctor);
+//				if(availDoctors.isEmpty()) {
+//					UserInterface.getInstance().printDepartmentLastError();
+//					return goMainMenu();
+//				}
+				dbManager.executeCheckDoctorAppoint(patientName, doctorID, timeStart, timeEnd, doctor.getDepartment(), 0, success);
+				return true;
 			}
 			
 			// 5.2 이미 어떤 다른 환자가 진료과만 지정해서 예약했고 자신이 담당하기로 되었더라도, 그 시간에 다른 (같은 진료과의) 의사가 있고 스케쥴이 비어있으면 자신은 진료예약 할 수 있습니다.
@@ -371,7 +374,7 @@ public class MainScene {
 			Doctor doctor = dbManager.getDoctor(patientID);
 			
 			// 해당 시간대에 근무 중인 의사
-			List<Doctor> workingDoctors = dbManager.getWorkingDoctors(timeStart, timeEnd, deptName); // 목표로 하는 진료과 의사들
+			List<Doctor> workingDoctors = dbManager.executeCheckTime(timeStart, timeEnd, deptName); // 목표로 하는 진료과 의사들
 			
 			// 목표 진료과에 모든 가능한 근무시간대의 의사 중에서 없는 한가한 의사 찾기 
 			List<Doctor> availDoctors = new ArrayList<Doctor>();
