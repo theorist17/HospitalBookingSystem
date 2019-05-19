@@ -7,12 +7,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+
+import com.mysql.cj.conf.ConnectionUrl.Type;
+import com.mysql.cj.jdbc.CallableStatement;
 
 import hospital.data.Appointment;
 import hospital.data.Bed;
@@ -742,12 +746,94 @@ public class DBManager {
 		return false;
 	}
 	
-	public List<Doctor> getWorkingDoctors(String timeStart, String timeEnd, String deptName) {
+	public List<Doctor> executeCheckTime(String timeStart, String timeEnd, String deptName) {
 		try {
 			statement = conn.prepareStatement("CALL check_time(?, ?, ?);");
 			statement.setString(1, timeStart);
 			statement.setString(2, timeEnd);
-			statement.setString(3, deptName);
+			statement.setString(3,deptName);
+
+			try (ResultSet resultSet = statement.executeQuery()) {
+				List<Doctor> doctors = new ArrayList<Doctor>();
+				while (resultSet.next()) {
+					int doctorID = resultSet.getInt("doctorID");
+					String name = resultSet.getString("name");
+					String department = resultSet.getString("department");
+					int price = resultSet.getInt("price");
+					
+					doctors.add(new Doctor(doctorID, name, department, price));
+				}
+				return doctors;
+			}
+			
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return null;
+	}
+	public List<Doctor> executeCheckDoctor(String timeStart, String timeEnd, int DoctorID) {
+		try {
+			
+			System.out.println("executeCheckTime");
+			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL doctor_available(?, ?, ?,?);");
+			statement = conn.prepareStatement("CALL doctor_available(?, ?, ?,?);");
+			statement.setString(1, timeStart);
+			statement.setString(2, timeEnd);
+			statement.setInt(3,DoctorID);
+			csmt.setString(1, timeStart);
+			csmt.setString(2, timeEnd);
+			csmt.setInt(3,DoctorID);
+			csmt.registerOutParameter(4, Types.BOOLEAN);
+			csmt.execute();
+			System.out.println(csmt.getBoolean(4));
+			if(csmt.getBoolean(4)) {
+				System.out.println("true");
+			}else
+				System.out.println("false");
+		
+
+			try (ResultSet resultSet = statement.executeQuery()) {
+				List<Doctor> doctors = new ArrayList<Doctor>();
+				while (resultSet.next()) {
+					int doctorID = resultSet.getInt("doctorID");
+					String name = resultSet.getString("name");
+					String department = resultSet.getString("department");
+					int price = resultSet.getInt("price");
+					
+					doctors.add(new Doctor(doctorID, name, department, price));
+				}
+				return doctors;
+			}
+			
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return null;
+	}
+	public List<Doctor> executeCheckFree_id(String timeStart, String timeEnd,int DoctorID, String deptName) {
+		try {
+			
+			System.out.println("executeCheckFree_id");
+			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL free_id(?, ?, ?, ?, ?);");
+//			statement = conn.prepareStatement("CALL doctor_available(?, ?, ?,?);");
+//			statement.setString(1, timeStart);
+//			statement.setString(2, timeEnd);
+//			statement.setInt(3,DoctorID);
+			csmt.setString(1, timeStart);
+			csmt.setString(2, timeEnd);
+			csmt.setInt(3,DoctorID);
+			csmt.setString(4, deptName);
+			csmt.registerOutParameter(5, Types.INTEGER);
+			csmt.execute();
+			System.out.println("getint:"+csmt.getInt(5));
+			
+		
 
 			try (ResultSet resultSet = statement.executeQuery()) {
 				List<Doctor> doctors = new ArrayList<Doctor>();
@@ -807,7 +893,7 @@ public class DBManager {
 							
 						} else {
 							// 진료예약이 진료과지정이면 대체의사를 찾아본다.
-							List<Doctor> candiDoctors = getWorkingDoctors(appointment.getTimeStart(), appointment.getTimeEnd(), deptName);
+							List<Doctor> candiDoctors = executeCheckTime(appointment.getTimeStart(), appointment.getTimeEnd(), deptName);
 							candiDoctors.remove(lookingForSub);
 							if (candiDoctors.isEmpty())
 								return null;

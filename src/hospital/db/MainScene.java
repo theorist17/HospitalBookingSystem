@@ -240,6 +240,7 @@ public class MainScene {
 	private boolean goChooseDoctor() {
 		UserInterface.getInstance().printDoctorInformation();
 		String diagnosis = "";
+		
 		diagnosis = this.scan.nextLine();
 
 		if (StringChecker.checkDiag(diagnosis)) {
@@ -250,6 +251,7 @@ public class MainScene {
 			String timeStart = ClockManager.clockDiag(word[3]);
 			String timeEnd = ClockManager.addHour(timeStart);
 
+			
 			// 환자 확인
 			Patient patient = dbManager.getPatient(patientID);
 			if (patient == null || !patient.getName().equals(patientName)) // 조회불가능 - 초진, 잘못된 입력, ..
@@ -258,9 +260,12 @@ public class MainScene {
 			// 예약을 하려는 이가 의사인지 확인 doctor == null 이면 환자
 			Doctor doctor = dbManager.getDoctor(patientID);
 			
+			dbManager.executeCheckDoctor(timeStart, timeEnd, doctorID);
+			
 			// 해당 시간대에 근무 중인 의사
-			List<Doctor> workingDoctors = dbManager.getWorkingDoctors(timeStart, timeEnd, dbManager.getDoctor(doctorID).getDepartment());
+			List<Doctor> workingDoctors = dbManager.executeCheckTime(timeStart, timeEnd, dbManager.getDoctor(doctorID).getDepartment());
 
+			
 			// 목표 진료과에 모든 가능한 근무시간대의 의사 중에서 진료과지정예약 없는 한가한 의사 찾기 
 			List<Doctor> availDoctors = new ArrayList<Doctor>();
 			for (int i = 0 ; i < workingDoctors.size(); i++) {
@@ -282,6 +287,7 @@ public class MainScene {
 			List<PreparedStatement> updateQueries = null;
 			if(doctor != null) {
 				// 대체할 의사 찾기
+				
 				List<Booking> schedules = dbManager.getAppointments(doctor.getDoctorId()); // 내 일정
 				updateQueries = dbManager.getSubDocQueries(schedules, timeStart, timeEnd, doctor.getDepartment(), doctor);
 				if (updateQueries == null) {// 의사의 모든 진료일정 다른 의사에게 넘기는 쿼
@@ -371,9 +377,10 @@ public class MainScene {
 			Doctor doctor = dbManager.getDoctor(patientID);
 			
 			// 해당 시간대에 근무 중인 의사
-			List<Doctor> workingDoctors = dbManager.getWorkingDoctors(timeStart, timeEnd, deptName); // 목표로 하는 진료과 의사들
+			List<Doctor> workingDoctors = dbManager.executeCheckTime(timeStart, timeEnd, deptName); // 목표로 하는 진료과 의사들
 			
 			// 목표 진료과에 모든 가능한 근무시간대의 의사 중에서 없는 한가한 의사 찾기 
+			
 			List<Doctor> availDoctors = new ArrayList<Doctor>();
 			for (int i = 0 ; i < workingDoctors.size(); i++) {
 				List<Booking> doctorSchedule = dbManager.getAppointments(workingDoctors.get(i).getDoctorId()); // 각 의사의 일정 
@@ -394,6 +401,7 @@ public class MainScene {
 			List<PreparedStatement> updateQueries = null;
 			if(doctor != null) {
 				// 대체할 의사 찾기
+				dbManager.executeCheckFree_id(timeStart, timeEnd, doctor.getDoctorId(),deptName);
 				List<Booking> schedules = dbManager.getAppointments(doctor.getDoctorId()); // 내 일정
 				updateQueries = dbManager.getSubDocQueries(schedules, timeStart, timeEnd, doctor.getDepartment(), doctor);
 				if (updateQueries == null) {// 의사의 모든 진료일정 다른 의사에게 넘기는 쿼리
