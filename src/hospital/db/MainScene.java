@@ -147,6 +147,12 @@ public class MainScene {
 					int bedID = Integer.parseInt(word[2]);
 					String timeStart = ClockManager.clockDiag(word[3]);
 					String timeEnd = ClockManager.clockDiag(word[4]);
+					
+					if (StringChecker.checkOneTwentyOne(String.valueOf(bedID))) {
+						UserInterface.getInstance().printAppointmentError();	// 침대번호 오입력
+						return goMainMenu();
+					}
+					
 					if (timeStart.compareTo(timeEnd) > 0) {
 						UserInterface.getInstance().printInputError(); // 시간 뒤바뀜
 						return goMainMenu();

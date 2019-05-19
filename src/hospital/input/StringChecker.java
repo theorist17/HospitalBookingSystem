@@ -26,8 +26,16 @@ public class StringChecker {
 		return true;
 	}
 	
-	public static boolean checkOneNine(String oneNine) {// 1~4 check
+	public static boolean checkOneNine(String oneNine) {// 1~9 check
 		if (!oneNine.matches("^[1-9]{1}$")) {
+			// UIManagerError
+			return false;
+		}
+		return true;
+	}
+	
+	public static boolean checkOneTwentyOne(String OneTwentyOne) {// 1~9 check
+		if (OneTwentyOne.matches("/(^[1-9]{1}$|^1[0-9]{1}$|^20$|^21$)/")) {
 			// UIManagerError
 			return false;
 		}
