@@ -998,10 +998,10 @@ public class DBManager {
 		return null;
 	}
 
-	public boolean executeCheckDoctorAppoint(String patientName, int doctorID, String timeStart, String timeEnd, String department, int onDept) {
+	public boolean executeCheckDoctorAppoint(String patientID, int doctorID, String timeStart, String timeEnd, String department, int onDept) {
 		try {
 			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL check_doctor_appoint(?, ?, ?, ?, ?, ?, ?);");
-			csmt.setString(1, patientName);
+			csmt.setString(1, patientID);
 			csmt.setInt(2, doctorID);
 			csmt.setString(3, timeStart);
 			csmt.setString(4, timeEnd);

@@ -244,7 +244,7 @@ public class MainScene {
 			Doctor doctor = dbManager.getDoctor(patientID);
 			if(doctor != null) {
 				//String name, int doctorID, String timeStart, String timeEnd, String department, int onDept
-				if(!dbManager.executeCheckDoctorAppoint(patientName, doctorID, timeStart, timeEnd, dbManager.getDoctor(doctorID).getDepartment(), 0)) {
+				if(!dbManager.executeCheckDoctorAppoint(patientID, doctorID, timeStart, timeEnd, dbManager.getDoctor(doctorID).getDepartment(), 0)) {
 					System.out.println("주어진 시간으로 " + doctor.getName()+" 의사 " + doctorID + "번 의사에게 예약 할 수 없음");
 					// 5.1 이미 어떤 다른 환자가 자신을 지정해서 진료를 예약한 시간이거나, 진료과만 지정해서 예약했지만 그때 자신의 진료과에 자신 밖에 없는 시간이면, 그 시간 구간에는 자신은 진료받지 못합니. (일 우선)     
 					// 5.2 이미 어떤 다른 환자가 진료과만 지정해서 예약했고 자신이 담당하기로 되었더라도, 그 시간에 다른 (같은 진료과의) 의사가 있고 스케쥴이 비어있으면 자신은 진료예약 할 수 있습니다.
@@ -341,15 +341,22 @@ public class MainScene {
 			List<Doctor> workingDoctors = dbManager.executeCheckTime(timeStart, timeEnd, deptName); // 목표로 하는 진료과 의사들
 			
 			// 목표 진료과에 모든 가능한 근무시간대의 의사 중에서 없는 한가한 의사 찾기 
-			
-			List<Doctor> availDoctors = new ArrayList<Doctor>();
+			List<Doctor> availDoctors = new ArrayList<Doctor>(workingDoctors);
 			for (int i = 0 ; i < workingDoctors.size(); i++) {
-				List<Booking> doctorSchedule = dbManager.getAppointments(workingDoctors.get(i).getDoctorId()); // 각 의사의 일정 
-				if(!ClockManager.isOverlapped(doctorSchedule, timeStart, timeEnd)) // 그 의사의 일정과 입력이 겹침	
-					availDoctors.add(workingDoctors.get(i));
+				
+				int doctorID = workingDoctors.get(i).getDoctorId();
+				
+				// 환자가 진료 예약 하려는 의사가 해당 시간에 진료가 잡혀있는지 조사
+				if(!dbManager.executeDoctorAvailable(timeStart, timeEnd, doctorID)) {
+					availDoctors.remove(workingDoctors.get(i));
+				}
+				
+				// 환자가 진료 예약 하려는 의사가 검사나 입원을 했는지 조사
+				if(!dbManager.executePainDoctor(timeStart, timeEnd, dbManager.getPatient(doctorID).getPatientId())) {
+					availDoctors.remove(workingDoctors.get(i));
+				}
 			}
 			
-
 			// 랜덤 의사 선택 & 의사 번호 지정
 			Random rand = new Random();
 			int doctorID = availDoctors.get(rand.nextInt(availDoctors.size())).getDoctorId();
