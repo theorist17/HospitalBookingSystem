@@ -676,6 +676,69 @@ public class DBManager {
 		return bookings;
 	}
 
+	/**
+	 * 의사가 아파서 진료과지정으로 배정받은 환자진료예약을 다른 의사에 넘기는 쿼리를 준비하는 함(update)
+	 * @param bookings
+	 * @param entryStart
+	 * @param entryEnd
+	 * @param candiDoctors
+	 * @return
+	 */
+	public List<PreparedStatement> getSubDocQueries(List<Booking> bookings, String entryStart, String entryEnd, String deptName, Doctor lookingForSub) {
+		
+		try {
+			Date newStart = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(entryStart);
+			Date newEnd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(entryEnd);
+			
+			List<Doctor> subDoctors = new ArrayList<Doctor>();
+			Random random = new Random();
+			List<PreparedStatement> updateQueries = new ArrayList<PreparedStatement>();
+
+			//의사 자신의 대체의사를 찾아보는 반복문.
+			for (int i = 0; i < bookings.size(); i++) {
+				Appointment appointment = (Appointment) bookings.get(i);
+				// 오직 인자로 주어진 자료형의 객체를 대상으로
+				Date oldStart = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(bookings.get(i).getTimeStart());
+				Date oldEnd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(bookings.get(i).getTimeEnd());
+
+				if ((newStart.compareTo(oldEnd) < 0 && oldStart.compareTo(newEnd) < 0)
+						|| (oldStart.compareTo(newStart) < 0 && newEnd.compareTo(oldEnd) < 0)
+						|| (oldStart.compareTo(newStart) == 0 && newEnd.compareTo(oldEnd) == 0)) {
+						// 입력과 의사의 예약중 시간 겹치는 것 가져오기
+						if( appointment.getOnDept() == 0) {
+							// 의사에 대한 진료예약이 의사지정이면 의사는 일해야 하므로 거짓 반환
+							return null;
+							
+						} else {
+							// 진료예약이 진료과지정이면 대체의사를 찾아본다.
+							List<Doctor> candiDoctors = executeCheckTime(appointment.getTimeStart(), appointment.getTimeEnd(), deptName);
+							candiDoctors.remove(lookingForSub);
+							if (candiDoctors.isEmpty())
+								return null;
+							Doctor subDoctor = candiDoctors.get(random.nextInt(candiDoctors.size()));
+							candiDoctors.remove(subDoctor);
+							subDoctors.add(subDoctor);
+							
+							// 쿼리를 모아둔다.
+							PreparedStatement updateQuery = conn.prepareStatement("update appointments set doctorID = ? where appointmentID = ?;");
+							updateQuery.setInt(1, subDoctor.getDoctorId());
+							updateQuery.setInt(2, appointment.getAppointmentID());
+							updateQueries.add(updateQuery);
+						}
+				}
+			}
+			
+			//자신의 환자를 다 넘겼으므로 참 반환
+			return updateQueries;
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public boolean setBookingHasPaid(Booking booking) {
 		try {
 			PreparedStatement statement = null;
@@ -692,16 +755,16 @@ public class DBManager {
 				statement = conn.prepareStatement("UPDATE stays SET hasPaid=1 WHERE stayID=?;");
 				statement.setInt(1, stay.getStayID());
 			}
-
+	
 			int affectedRows = statement.executeUpdate();
-
+	
 			if (affectedRows == 1) {
 				booking.setHasPaid(1);
 				return true;
 			} else {
 				throw new SQLException("UPDATE haspaid failed, no rows affected.");
 			}
-
+	
 		} catch (SQLException e) {
 			System.err.println("SQLException: " + e.getMessage());
 			System.err.println("SQLState: " + e.getSQLState());
@@ -712,10 +775,10 @@ public class DBManager {
 	}
 
 	boolean deleteBooking(Booking booking) {
-
+	
 		try {
 			PreparedStatement statement = null;
-
+	
 			if (booking instanceof Appointment) {
 				Appointment appointment = (Appointment) booking;
 				statement = conn.prepareStatement("DELETE FROM appointments WHERE appointmentID = ?;");
@@ -729,14 +792,14 @@ public class DBManager {
 				statement = conn.prepareStatement("DELETE FROM stays WHERE stayID = ?;");
 				statement.setInt(1, stay.getStayID());
 			}
-
+	
 			int affectedRows = statement.executeUpdate();
-
+	
 			if (affectedRows == 1)
 				return true;
 			else
 				throw new SQLException("UPDATE haspaid failed, no rows affected.");
-
+	
 		} catch (SQLException e) {
 			System.err.println("SQLException: " + e.getMessage());
 			System.err.println("SQLState: " + e.getSQLState());
@@ -857,70 +920,39 @@ public class DBManager {
 		return null;
 	}
 	
-
-	/**
-	 * 의사가 아파서 진료과지정으로 배정받은 환자진료예약을 다른 의사에 넘기는 쿼리를 준비하는 함(update)
-	 * @param bookings
-	 * @param entryStart
-	 * @param entryEnd
-	 * @param candiDoctors
-	 * @return
-	 */
-	public List<PreparedStatement> getSubDocQueries(List<Booking> bookings, String entryStart, String entryEnd, String deptName, Doctor lookingForSub) {
-		
+	public List<Doctor> executeCheckDoctorAppoint(String javaPersonal, int javaDoctorID, String javaStart, String javaEnd, String javaDept, int checkDept, boolean result) {
 		try {
-			Date newStart = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(entryStart);
-			Date newEnd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(entryEnd);
-			
-			List<Doctor> subDoctors = new ArrayList<Doctor>();
-			Random random = new Random();
-			List<PreparedStatement> updateQueries = new ArrayList<PreparedStatement>();
-
-			//의사 자신의 대체의사를 찾아보는 반복문.
-			for (int i = 0; i < bookings.size(); i++) {
-				Appointment appointment = (Appointment) bookings.get(i);
-				// 오직 인자로 주어진 자료형의 객체를 대상으로
-				Date oldStart = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(bookings.get(i).getTimeStart());
-				Date oldEnd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(bookings.get(i).getTimeEnd());
-
-				if ((newStart.compareTo(oldEnd) < 0 && oldStart.compareTo(newEnd) < 0)
-						|| (oldStart.compareTo(newStart) < 0 && newEnd.compareTo(oldEnd) < 0)
-						|| (oldStart.compareTo(newStart) == 0 && newEnd.compareTo(oldEnd) == 0)) {
-						// 입력과 의사의 예약중 시간 겹치는 것 가져오기
-						if( appointment.getOnDept() == 0) {
-							// 의사에 대한 진료예약이 의사지정이면 의사는 일해야 하므로 거짓 반환
-							return null;
-							
-						} else {
-							// 진료예약이 진료과지정이면 대체의사를 찾아본다.
-							List<Doctor> candiDoctors = executeCheckTime(appointment.getTimeStart(), appointment.getTimeEnd(), deptName);
-							candiDoctors.remove(lookingForSub);
-							if (candiDoctors.isEmpty())
-								return null;
-							Doctor subDoctor = candiDoctors.get(random.nextInt(candiDoctors.size()));
-							candiDoctors.remove(subDoctor);
-							subDoctors.add(subDoctor);
-							
-							// 쿼리를 모아둔다.
-							PreparedStatement updateQuery = conn.prepareStatement("update appointments set doctorID = ? where appointmentID = ?;");
-							updateQuery.setInt(1, subDoctor.getDoctorId());
-							updateQuery.setInt(2, appointment.getAppointmentID());
-							updateQueries.add(updateQuery);
-						}
+			statement = conn.prepareStatement("CALL check_doctor_appoint(?, ?, ?, ?, ?, ?, @?);");
+			statement.setString(1, "9203221111111");
+			statement.setInt(2, 1);
+			statement.setString(3, "2019-05-18 09:00:00");
+			statement.setString(4, "2019-05-18 10:00:00");
+			statement.setString(5, "안과");
+			statement.setInt(6, 0);
+			statement.setInt(7, 0);
+	
+			try (ResultSet resultSet = statement.executeQuery()) {
+				List<Doctor> doctors = new ArrayList<Doctor>();
+				while (resultSet.next()) {
+					int doctorID = resultSet.getInt("doctorID");
+					String name = resultSet.getString("name");
+					String department = resultSet.getString("department");
+					int price = resultSet.getInt("price");
+					
+					doctors.add(new Doctor(doctorID, name, department, price));
 				}
+				return doctors;
 			}
 			
-			//자신의 환자를 다 넘겼으므로 참 반환
-			return updateQueries;
-			
-		} catch (ParseException e) {
-			e.printStackTrace();
 		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
 	public void disconnectDb() {
         try {
             statement.close();
