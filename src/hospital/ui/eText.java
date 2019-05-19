@@ -54,7 +54,7 @@ public enum eText{
       
       Input_Error("올바르지 않은 입력입니다."),
       FirstVisit_Error("초진의 경우 진료예약만 가능합니다."),
-      TimeOverlap_Error("시간이 겹쳤습니다."),
+      TimeOverlap_Error("해당 시간에 이미 예약한 진료/검사있습니다."),
       Department_Error("해당 과에 시간이 겹쳤습니다."),
       DepartmentLast_Error("해당 시간에 가능한 대체의사가 없습니다."),
       AppointmentResult_Error("진료예약에 실패하였습니다.")

@@ -66,9 +66,7 @@ public class ClockManager {
 				Date oldEnd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(bookings.get(i).getTimeEnd());
 				if (newStart.compareTo(oldEnd) < 0 && oldStart.compareTo(newEnd) < 0)
 					return true;
-				else if (oldStart.compareTo(newStart) < 0 && newEnd.compareTo(oldEnd) < 0)
-					return true;
-				else if (oldStart.compareTo(newStart) == 0 && newEnd.compareTo(oldEnd) == 0)
+				else if (oldStart.compareTo(newStart) == 0 && oldStart.compareTo(newEnd) == 0)
 					return true;
 			}
 		} catch (ParseException e) {

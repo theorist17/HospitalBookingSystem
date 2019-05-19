@@ -516,8 +516,7 @@ public class DBManager {
 					int hasPaid = resultSet.getInt("hasPaid");
 
 					if (bookingType.equals("진료")) {
-						Appointment appointment = new Appointment(bookingID, patientID, resourceID, timeStart, timeEnd,
-								hasPaid, 0);
+						Appointment appointment = new Appointment(bookingID, patientID, resourceID, timeStart, timeEnd,hasPaid, 0);
 						bookings.add((Booking) appointment);
 					} else if (bookingType.equals("검사")) {
 						Checkup checkup = new Checkup(bookingID, patientID, resourceID, timeStart, timeEnd, hasPaid);
@@ -811,10 +810,10 @@ public class DBManager {
 	
 	public List<Doctor> executeCheckTime(String timeStart, String timeEnd, String deptName) {
 		try {
-			statement = conn.prepareStatement("CALL check_time(?, ?, ?);");
+			statement = conn.prepareStatement("call check_time(?, ?, ?);");
 			statement.setString(1, timeStart);
 			statement.setString(2, timeEnd);
-			statement.setString(3,deptName);
+			statement.setString(3, deptName);
 
 			try (ResultSet resultSet = statement.executeQuery()) {
 				List<Doctor> doctors = new ArrayList<Doctor>();
@@ -838,29 +837,18 @@ public class DBManager {
 		return null;
 	}
 
-	public List<Doctor> executeCheckDoctorAppoint(String javaPersonal, int javaDoctorID, String javaStart, String javaEnd, String javaDept, int checkDept, boolean result) {
+	public boolean executeCheckDoctorAppoint(String patientName, int doctorID, String timeStart, String timeEnd, String department, int onDept) {
 		try {
-			statement = conn.prepareStatement("CALL check_doctor_appoint(?, ?, ?, ?, ?, ?, @?);");
-			statement.setString(1, "9203221111111");
-			statement.setInt(2, 1);
-			statement.setString(3, "2019-05-18 09:00:00");
-			statement.setString(4, "2019-05-18 10:00:00");
-			statement.setString(5, "안과");
-			statement.setInt(6, 0);
-			statement.setInt(7, 0);
-	
-			try (ResultSet resultSet = statement.executeQuery()) {
-				List<Doctor> doctors = new ArrayList<Doctor>();
-				while (resultSet.next()) {
-					int doctorID = resultSet.getInt("doctorID");
-					String name = resultSet.getString("name");
-					String department = resultSet.getString("department");
-					int price = resultSet.getInt("price");
-					
-					doctors.add(new Doctor(doctorID, name, department, price));
-				}
-				return doctors;
-			}
+			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL check_doctor_appoint(?, ?, ?, ?, ?, ?, ?);");
+			csmt.setString(1, patientName);
+			csmt.setInt(2, doctorID);
+			csmt.setString(3, timeStart);
+			csmt.setString(4, timeEnd);
+			csmt.setString(5, department);
+			csmt.setInt(6, onDept);
+			csmt.registerOutParameter(7, Types.BOOLEAN);
+			csmt.execute();
+			return csmt.getBoolean(7);
 			
 		} catch (SQLException e) {
 			System.err.println("SQLException: " + e.getMessage());
@@ -868,12 +856,11 @@ public class DBManager {
 			System.err.println("VendorError: " + e.getErrorCode());
 			e.printStackTrace();
 		}
-		return null;
+		return false;	
 	}
 	public boolean executeDoctorWorkTime(String timeStart, String timeEnd, int DoctorID) {
 		try {
-			
-			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL doctor_workTime(?, ?, ?,?);");
+			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL doctor_workTime(?, ?, ?, ?);");
 			csmt.setString(1, timeStart);
 			csmt.setString(2, timeEnd);
 			csmt.setInt(3,DoctorID);
@@ -893,7 +880,7 @@ public class DBManager {
 	public boolean executeDoctorAvailable(String timeStart, String timeEnd, int DoctorID) {
 		try {
 			
-			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL doctor_available(?, ?, ?,?);");
+			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL doctor_available(?, ?, ?, ?);");
 			csmt.setString(1, timeStart);
 			csmt.setString(2, timeEnd);
 			csmt.setInt(3,DoctorID);
@@ -909,6 +896,27 @@ public class DBManager {
 		}
 		return false;
 	}
+	
+	public boolean executePainDoctor(String timeStart, String timeEnd, String patientID) {
+		try {
+			
+			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL pain_doctor(?, ?, ?,?);");
+			csmt.setString(1, timeStart);
+			csmt.setString(2, timeEnd);
+			csmt.setString(3,patientID);
+			csmt.registerOutParameter(4, Types.BOOLEAN);
+			csmt.execute();
+			return csmt.getBoolean(4);
+			
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
 	public List<Doctor> executeCheckFree_id(String timeStart, String timeEnd,int DoctorID, String deptName) {
 		try {
 			

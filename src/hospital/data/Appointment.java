@@ -13,17 +13,10 @@ public class Appointment extends Booking {
 		this.onDept = onDept;
 	}
 
-	public int getOnDept() {
-		return onDept;
-	}
-
-	public void setOnDept(int onDept) {
-		this.onDept = onDept;
-	}
-
-	public Appointment(String patientID, int doctorID, String timeStart, String timeEnd, int hasPaid) {
+	public Appointment(String patientID, int doctorID, String timeStart, String timeEnd, int hasPaid, int onDept) {
 		super(patientID, timeStart, timeEnd, hasPaid);
 		this.doctorID = doctorID;
+		this.onDept = onDept;
 	}
 
 	public int getAppointmentID() {
@@ -41,5 +34,15 @@ public class Appointment extends Booking {
 	public void setDoctorID(int doctorID) {
 		this.doctorID = doctorID;
 	}
+	
+
+	public int getOnDept() {
+		return onDept;
+	}
+
+	public void setOnDept(int onDept) {
+		this.onDept = onDept;
+	}
+
 
 }
