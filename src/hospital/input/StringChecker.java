@@ -65,7 +65,7 @@ public class StringChecker {
 	}
 
 	public static boolean lookupBed(String bedNum) {
-		if (!bedNum.matches("([0-1]{1}[0-9]{1}|20)")) {
+		if (!bedNum.matches("[1-6]{1}")) {
 			// UIManagerError
 			return false;
 		}

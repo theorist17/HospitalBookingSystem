@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.io.*;
 
 
 import hospital.data.Appointment;
@@ -482,148 +483,66 @@ public class MainScene {
 		}
 	}
 
-	private boolean goDoctorMenu1() {
-		System.out.println("진료목록을 조회할 의사번호를 입력하세요.");
-		String input = this.scan.nextLine();
-		if (StringChecker.checkOneThree(input)) {
-			switch (Integer.parseInt(input)) {
-			case 1:
-				// Doctor Doctor=new Doctor();
-				System.out.println("1번 의사의 환자정보 출력");
-				return goMainMenu();
-			case 2:
-				System.out.println("2번 의사의 환자정보 출력");
-				return goMainMenu();
-			case 3:
-				System.out.println("3번 의사의 환자정보 출력");
-				return goMainMenu();
-			default:
-				return goMainMenu();
-			}
-		} else {
-			UserInterface.getInstance().printMainError();
-			return goMainMenu();
-		}
+	   // import java.io.*;
+	   public static void pause() {
+	       try {
+	         System.in.read();
+	       } catch (IOException e) { }
+	   }
+	   
+	   private boolean goDoctorMenu1() {
+	      System.out.println("진료목록을 조회할 의사번호를 입력하세요.");
+	      String input = this.scan.nextLine();
+	      if (StringChecker.checkOneThree(input)) {
+	         // 의사의 의사번호를 통해서 DB에 접근하기
+	         dbManager.printBookings_for_doctor(dbManager.getBookings_for_appointment(Integer.parseInt(input)));
+	         //pause();
+	         return goMainMenu();   
+	      } else {
+	         UserInterface.getInstance().printMainError();
+	         return goMainMenu();
+	      }
 
-	}
+	   }
+	   
+	   private boolean goDoctorMenu2() {
+	      System.out.println("조회할 검사번호를 입력하세요.");
+	      String input = this.scan.nextLine();
+	      System.out.println(Integer.parseInt(input) + "번 검사를 예약한 환자정보 출력");
+	      if (StringChecker.checkOneThree(input)) {
+	         // 검사번호를 통해서 DB에 접근하기
+	         //dbManager.printBookings_for_doctor(dbManager.getBookings_for_checkup(Integer.parseInt(input)));
+	         //pause();
+	         return goMainMenu();   
+	      } else {
+	         UserInterface.getInstance().printMainError();
+	         return goMainMenu();
+	      }
+	   }
 
-	private boolean goDoctorMenu2() {
-		System.out.println("조회할 검사번호를 입력하세요.");
-		String input = this.scan.nextLine();
-		if (StringChecker.checkOneThree(input)) {
-			switch (Integer.parseInt(input)) {
-			case 1:
-				// CheckUp CheckUp=new CheckUp();
-				System.out.println("1번 검사를 예약한 환자정보 출력");
-				return goMainMenu();
-			case 2:
-				System.out.println("2번 검사를 예약한 환자정보 출력");
-				return goMainMenu();
-			case 3:
-				System.out.println("3번 검사를 예약한 환자정보 출력");
-				return goMainMenu();
-			default:
-				return goMainMenu();
-			}
-		} else {
-			UserInterface.getInstance().printMainError();
-			return goMainMenu();
-		}
-	}
+	   private boolean goDoctorMenu3() {
+	      System.out.println("조회할 방번호를 입력하세요.");
+	      String input = this.scan.nextLine();
+	      if (StringChecker.lookupBed(input)) {
+	         // 방 번호를 통해서 DB에 접근하기
+	         dbManager.printBookings_for_doctor(dbManager.getBookings_for_stay(Integer.parseInt(input)));
+	         //pause();
+	         return goMainMenu();   
+	      } else {
+	         System.out.println("1~6 사이 정수를 입력하세요.");
+	         return goMainMenu();
+	      }
+	   }
 
-	private boolean goDoctorMenu3() {
-		System.out.println("조회할 방번호를 입력하세요.");
-		String input = this.scan.nextLine();
-		if (StringChecker.lookupBed(input)) {
-			for(int i=1;i<=20;i++) {
-				if(i==Integer.parseInt(input)) {
-					//room
-					return goMainMenu();
-				}
-			}return goMainMenu();
-			/*
-			
-			switch (Integer.parseInt(input)) {
-			case 1:
-				// Room Room=new Room();
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 2:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 3:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 4:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 5:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 6:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 7:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 8:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 9:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 10:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 11:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 12:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 13:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 14:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 15:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 16:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 17:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 18:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 19:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			case 20:
-				System.out.println("1~4번 침대정보 출력");
-				return goMainMenu();
-			default:
-				return goMainMenu();
-			}*/
-		} else {
-			System.out.println("1~20 사이 정수를 입력하세요.");
-			return goMainMenu();
-		}
-	}
-
-	private boolean goDoctorMenu4() {
-		System.out.println("수납여부를 조회할 환자의 주민번호를 입력하세요.");
-		String input = this.scan.nextLine();
-		if (StringChecker.checkOnlyPersonalNum(input)) {
-			System.out.println("수납여부 목록 출력");
-			return goMainMenu();
-		} // stringcheck
-		else {
-			System.out.println("13자리 정수의 주민번호를 입력하세요.");
-			return goMainMenu();
-		}
-	}
-}
+	   private boolean goDoctorMenu4() {
+	      System.out.println("수납여부를 조회할 환자의 주민번호를 입력하세요.");
+	      String input = this.scan.nextLine();
+	      if (StringChecker.checkOnlyPersonalNum(input)) {
+	         System.out.println("수납여부 목록 출력");
+	         return goMainMenu();
+	      } // stringcheck
+	      else {
+	         System.out.println("13자리 정수의 주민번호를 입력하세요.");
+	         return goMainMenu();
+	      }
+	   }}

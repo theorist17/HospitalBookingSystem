@@ -584,6 +584,118 @@ public class DBManager {
 		}
 		return null;
 	}
+	
+	public List<Booking> getBookings_for_appointment(int doctorID) {
+	      try {
+	         statement = conn.prepareStatement("SELECT  *, '진료' as Source\n" + "FROM appointments\n" + "where doctorID = ?\n;");
+	         statement.setInt(1, doctorID);
+
+	         try (ResultSet resultSet = statement.executeQuery()) {
+
+	            List<Booking> bookings = new ArrayList<Booking>();
+
+	            while (resultSet.next()) {
+	               String bookingType = resultSet.getString("Source");
+
+	               // getting attributes for all bookings
+	               int bookingID = resultSet.getInt(1);
+	               String patientID = resultSet.getString("patientID");
+	               int resourceID = resultSet.getInt(3);
+	               String timeStart = resultSet.getString("timeStart");
+	               String timeEnd = resultSet.getString("timeEnd");
+	               int hasPaid = resultSet.getInt("hasPaid");
+
+	               // 이름, 환자주민, 시작, 종료
+	               if (bookingType.equals("진료")) {
+	                  Appointment appointment = new Appointment(bookingID, patientID, resourceID, timeStart, timeEnd,
+	                        hasPaid, 0);
+	                  bookings.add((Booking) appointment);
+	               }
+	            }
+	            return bookings;
+	         }
+	      } catch (SQLException e) {
+	         System.err.println("SQLException: " + e.getMessage());
+	         System.err.println("SQLState: " + e.getSQLState());
+	         System.err.println("VendorError: " + e.getErrorCode());
+	         e.printStackTrace();
+	      }
+	      return null;
+	   }
+	   
+	   public List<Booking> getBookings_for_checkup(int testID) {
+	      try {
+	         statement = conn.prepareStatement("SELECT *, '검사' as Source\n" + "FROM checkups \n" + "where testID = ?\n;");
+	         statement.setInt(1, testID);
+
+	         try (ResultSet resultSet = statement.executeQuery()) {
+
+	            List<Booking> bookings = new ArrayList<Booking>();
+
+	            while (resultSet.next()) {
+	               String bookingType = resultSet.getString("Source");
+
+	               // getting attributes for all bookings
+//	               int bookingID = resultSet.getInt(1);
+//	               String patientID = resultSet.getString("patientID");
+//	               int resourceID = resultSet.getInt(3);
+//	               String timeStart = resultSet.getString("timeStart");
+//	               String timeEnd = resultSet.getString("timeEnd");
+//	               int hasPaid = resultSet.getInt("hasPaid");
+	               
+	               // 이름, 환자주민, 시작, 종료
+//	               if (bookingType.equals("검사")) {
+//	                  Checkup checkup = new Checkup(bookingID, patientID, resourceID, timeStart, timeEnd, hasPaid);
+//	                  bookings.add((Booking) checkup);
+//	               }
+	            }
+	            return bookings;
+	         }
+	      } catch (SQLException e) {
+	         System.err.println("SQLException: " + e.getMessage());
+	         System.err.println("SQLState: " + e.getSQLState());
+	         System.err.println("VendorError: " + e.getErrorCode());
+	         e.printStackTrace();
+	      }
+	      return null;
+	   }
+	   
+	   public List<Booking> getBookings_for_stay(int roomID) {
+	      try {
+	         statement = conn.prepareStatement("SELECT s.*, '입원' as Source\n" + "FROM beds b, stays s\n" + "where b.roomID = ? and b.bedID = s.bedID order by b.bedID asc\n;");
+	         statement.setInt(1, roomID);
+
+	         try (ResultSet resultSet = statement.executeQuery()) {
+
+	            List<Booking> bookings = new ArrayList<Booking>();
+
+	            while (resultSet.next()) {
+	               String bookingType = resultSet.getString("Source");
+
+	               // getting attributes for all bookings
+	               int bookingID = resultSet.getInt(1);
+	               String patientID = resultSet.getString("patientID");
+	               int resourceID = resultSet.getInt(3);
+	               String timeStart = resultSet.getString("timeStart");
+	               String timeEnd = resultSet.getString("timeEnd");
+	               int hasPaid = resultSet.getInt("hasPaid");
+	               
+	               // 침대번호, 시작시간, 종료시간
+	               if (bookingType.equals("입원")) {
+	                  Stay stay = new Stay(bookingID, patientID, resourceID, timeStart, timeEnd, hasPaid);
+	                  bookings.add((Booking) stay);
+	               }
+	            }
+	            return bookings;
+	         }
+	      } catch (SQLException e) {
+	         System.err.println("SQLException: " + e.getMessage());
+	         System.err.println("SQLState: " + e.getSQLState());
+	         System.err.println("VendorError: " + e.getErrorCode());
+	         e.printStackTrace();
+	      }
+	      return null;
+	   }
 
 	public List<Booking> getAppointments() {
 		try {
@@ -675,6 +787,55 @@ public class DBManager {
 		return bookings;
 	}
 
+	public List<Booking> printBookings_for_doctor(List<Booking> bookings) {
+	      for (int i = 0; i < bookings.size(); i++) {
+	         if (bookings.get(i) instanceof Appointment) {
+	            Appointment appointment = (Appointment) bookings.get(i);
+	            if(i==0) {
+	               System.out.println(getDoctor(appointment.getDoctorID()).getName() + " 의사가 진료했던 과거의 환자정보 출력");
+	               System.out.println("구분\t환자이름\t주민번호\t\t시작시간\t\t\t종료시간");
+	            }
+	            System.out.println((i + 1) + "\t" +
+	            getPatient(appointment.getPatientID()).getName() + "\t" +
+	            getPatient(appointment.getPatientID()).getPatientId() + "\t" +
+	            appointment.getTimeStart() + "\t" +
+	            appointment.getTimeEnd());
+	         }
+	         
+	         else if (bookings.get(i) instanceof Checkup) {
+	            Checkup checkup = (Checkup) bookings.get(i);
+	            if(i==0) {
+	               System.out.println("구분\t환자이름\t주민번호\t\t시작시간\t\t\t종료시간");
+	            }
+	            System.out.println(
+	                  (i + 1) + ". 검사, " + checkup.getTestID() + "&" + getTest(checkup.getTestID()).getName() + ", "
+	                        + checkup.getTimeStart() + ", " + checkup.getTimeEnd() + " " + checkup.getCheckupID());
+	         }
+	         
+	         else if (bookings.get(i) instanceof Stay) {
+	            Stay stay = (Stay) bookings.get(i);
+	            if(i==0) {
+	               System.out.println("구분\t방번호\t침대번호\t\t시작시간\t\t\t종료시간");
+	            }
+	            
+	            
+	            
+	            System.out.println((i + 1) + "\t" + getBed(stay.getBedID()).getRoomID() + "호실" + "\t" + stay.getBedID() + 
+	                  "\t\t" + stay.getTimeStart() + ", " + stay.getTimeEnd());
+	            
+	            
+//	            Stay appointment = (Stay) bookings.get(i);
+//	            
+//	            System.out.println((i + 1) + "\t" +
+//	            getPatient(appointment.getPatientID()).getName() + "\t" +
+//	            getPatient(appointment.getPatientID()).getPatientId() + "\t" +
+//	            appointment.getTimeStart() + "\t" +
+//	            appointment.getTimeEnd());
+	         }
+	      }
+	      return bookings;
+	   }
+	
 	/**
 	 * 의사가 아파서 진료과지정으로 배정받은 환자진료예약을 다른 의사에 넘기는 쿼리를 준비하는 함(update)
 	 * @param bookings
