@@ -772,16 +772,16 @@ public class DBManager {
 				Appointment appointment = (Appointment) bookings.get(i);
 				System.out.println((i + 1) + ". 진료, " + appointment.getDoctorID() + "&"
 						+ getDoctor(appointment.getDoctorID()).getName() + ", " + appointment.getTimeStart() + ", "
-						+ appointment.getTimeEnd() + " " + appointment.getAppointmentID());
+						+ appointment.getTimeEnd());
 			} else if (bookings.get(i) instanceof Checkup) {
 				Checkup checkup = (Checkup) bookings.get(i);
 				System.out.println(
 						(i + 1) + ". 검사, " + checkup.getTestID() + "&" + getTest(checkup.getTestID()).getName() + ", "
-								+ checkup.getTimeStart() + ", " + checkup.getTimeEnd() + " " + checkup.getCheckupID());
+								+ checkup.getTimeStart() + ", " + checkup.getTimeEnd());
 			} else if (bookings.get(i) instanceof Stay) {
 				Stay stay = (Stay) bookings.get(i);
 				System.out.println((i + 1) + ". 입원, 침대" + stay.getBedID() + "&" + getBed(stay.getBedID()).getRoomID()
-						+ "호실, " + stay.getTimeStart() + ", " + stay.getTimeEnd() + " " + stay.getStayID());
+						+ "호실, " + stay.getTimeStart() + ", " + stay.getTimeEnd());
 			}
 		}
 		return bookings;
@@ -1131,6 +1131,6 @@ public class DBManager {
 	
 
 	public void log(String string) {
-		System.err.println(string);
+		//System.err.println(string);
 	}
 }

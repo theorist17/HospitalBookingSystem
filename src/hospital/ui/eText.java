@@ -7,12 +7,14 @@ public enum eText{
       MAIN_MENU_2("2. 의사"),
       MAIN_MENU_3("3. 종료하기"),
       MAIN_ERROR("[1,3]의 정수를 입력하세요."),
+      MAIN_ERROR1("[1,9]의 정수를 입력하세요."),
       
       MENU1_RESULT_1("1. 예약 등록"),
       MENU1_RESULT_2("2. 예약 조회"),
       MENU1_RESULT_3("3. 예약 취소"),
       MENU1_RESULT_4("4. 수납하기"),
       MENU1_ERROR("[1,4]의 정수를 입력하세요."),
+      MENU1_ERROR1("[1,9]의 정수를 입력하세요."),
 
       MENU2_RESULT_1("1. 진료 목록 조회"),
       MENU2_RESULT_2("2. 검사 목록 조회"),
@@ -47,7 +49,29 @@ public enum eText{
       CheckUp_Information("검사번호와 검사이름입니다."+"\n"+"1. 내시경"+"\n"
       +"2. 피검사"+"\n"+"3. 초음파"),
       CheckUp_InputInformation("이름/주민번호/검사번호/시작시간 순으로 입력하세요."),
-      Bed_Information("침대위치/침대번호 출력"),
+      Bed_Information("침대번호 정보입니다." + "\n"
+                        + "1번침대 (1호실)" + "\t"
+                        + "2번침대 (2호실)" + "\t"
+                        + "3번침대 (2호실)" + "\n"
+                        + "4번침대 (3호실)" + "\t"
+                        + "5번침대 (3호실)" + "\t"
+                        + "6번침대 (3호실)" + "\n"
+                        + "7번침대 (4호실)" + "\t"
+                        + "8번침대 (4호실)" + "\t"
+                        + "9번침대 (4호실)" + "\n"
+                        + "10번침대 (4호실)" + "\t"
+                        + "11번침대 (5호실)" + "\t"
+                        + "12번침대 (5호실)" + "\n"
+                        + "13번침대 (5호실)" + "\t"
+                        + "14번침대 (5호실)" + "\t"
+                        + "15번침대 (5호실)" + "\n"
+                        + "16번침대 (6호실)" + "\t"
+                        + "17번침대 (6호실)" + "\t"
+                        + "18번침대 (6호실)" + "\n"
+                        + "19번침대 (6호실)" + "\t"
+                        + "20번침대 (6호실)" + "\t"
+                        + "21번침대 (6호실)"
+                     ),
       Bed_InputInformation("이름/주민번호/침대번호/시작시간/종료시간 순으로 입력하세요."),
       Appointment_Patient("예약하신 환자의 이름/주민번호를 입력하세요."),
       
@@ -61,16 +85,16 @@ public enum eText{
       
       ;
 
-	
-	
-	final private String text;
+   
+   
+   final private String text;
 
-	private eText(String text) {
-		this.text = text;
-	}
+   private eText(String text) {
+      this.text = text;
+   }
 
-	// System.out.println(this.text); unit test }
-	public String getText() {
-		return text;
-	}
+   // System.out.println(this.text); unit test }
+   public String getText() {
+      return text;
+   }
 }

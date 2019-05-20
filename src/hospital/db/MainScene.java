@@ -506,7 +506,7 @@ public class MainScene {
 	         //pause();
 	         return goMainMenu();   
 	      } else {
-	         UserInterface.getInstance().printMainError();
+	         UserInterface.getInstance().printMainError1();
 	         return goMainMenu();
 	      }
 
