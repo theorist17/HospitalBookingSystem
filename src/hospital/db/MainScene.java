@@ -327,7 +327,7 @@ public class MainScene {
 			if(doctor != null) {
 				//String name, int doctorID, String timeStart, String timeEnd, String department, int onDept
 				if(!dbManager.executeCheckDoctorAppoint(patientName, 1, timeStart, timeEnd, deptName, 1)) {
-					System.out.println("주어진 시간으로 " + deptName+" 과 의사에게 예약 할 수 없음");
+					System.out.println("주어진 시간으로 " + deptName+" 의사에게 예약 할 수 없음");
 					// 5.1 이미 어떤 다른 환자가 자신을 지정해서 진료를 예약한 시간이거나, 진료과만 지정해서 예약했지만 그때 자신의 진료과에 자신 밖에 없는 시간이면, 그 시간 구간에는 자신은 진료받지 못합니. (일 우선)     
 					// 5.2 이미 어떤 다른 환자가 진료과만 지정해서 예약했고 자신이 담당하기로 되었더라도, 그 시간에 다른 (같은 진료과의) 의사가 있고 스케쥴이 비어있으면 자신은 진료예약 할 수 있습니다.
 					// 5.3 자신이 진료를 받고있는 동안에는, 자신의 원래 진료시간이더라도 환자들은 그 시간 동안 그 의사에게 진료를 예약하지 못합니다. 
