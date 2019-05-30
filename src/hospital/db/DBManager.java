@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import com.mysql.cj.conf.ConnectionUrl.Type;
 import com.mysql.cj.jdbc.CallableStatement;
 
 import hospital.data.Appointment;
@@ -49,10 +48,10 @@ public class DBManager {
 
 	}
 
-	public void LoadConnection() {
+	public void LoadConnection()  {
 		try {
 			conn = DriverManager
-					.getConnection("jdbc:mysql://1.240.123.168:3306/hospital?" + "user=dev&password=MySQL!=1");
+					.getConnection("jdbc:mysql://175.113.152.102:3306/hospital?" + "user=dev&password=MySQL!=1");
 
 			if (conn != null) {
 				log("Connection Successful! Now it's time to push data.");
