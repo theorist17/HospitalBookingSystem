@@ -70,8 +70,8 @@ public class UserInterface {
    }
 
    public void printBedInformation() {
-      this.printTextWithKey(eText.Bed_Information);
-      this.printTextWithKey(eText.Bed_InputInformation);
+      //this.printTextWithKey(eText.Bed_Information2);
+      this.printTextWithKey(eText.Bed_InputInformation2);
    }
 
    public void printAppointPatient() {

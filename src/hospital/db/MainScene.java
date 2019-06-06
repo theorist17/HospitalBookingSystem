@@ -140,13 +140,13 @@ public class MainScene {
 				UserInterface.getInstance().printBedInformation();
 				String stay = this.scan.nextLine();
 
-				if (StringChecker.checkAdmission(stay)) {
+				if (StringChecker.checkAdmission2(stay)) {
 					String[] word = stay.split("\\/");
 					String patientName = word[0];
 					String patientID = word[1];
-					int bedID = Integer.parseInt(word[2]);
-					String timeStart = ClockManager.clockDiag(word[3]);
-					String timeEnd = ClockManager.clockDiag(word[4]);
+					//int bedID = Integer.parseInt(word[2]);
+					String timeStart = ClockManager.clockDiag(word[2]);
+					String timeEnd = ClockManager.clockDiag(word[3]);
 					if (timeStart.compareTo(timeEnd) > 0) {
 						UserInterface.getInstance().printInputError(); // 시간 뒤바뀜
 						return goMainMenu();
@@ -174,14 +174,17 @@ public class MainScene {
 					}
 
 					// 모든 환자가 (입력한 시간에) (입력한 침대번호로) 진료/검사를 이미 예약해 둔 경우 배제 (선점된 예약)
-					bookings = dbManager.getBookings(timeStart, timeEnd); // 모든 환자의 예약
-					if (ClockManager.isOverlapped(bookings, timeStart, timeEnd, "Stay", bedID)) {
-						UserInterface.getInstance().printTimeOverlapError();
-						return goMainMenu();
-					}
+//					bookings = dbManager.getBookings(timeStart, timeEnd); // 모든 환자의 예약
+//					if (ClockManager.isOverlapped(bookings, timeStart, timeEnd, "Stay", bedID)) {
+//						UserInterface.getInstance().printTimeOverlapError();
+//						return goMainMenu();
+//					}
 
-					if (dbManager.addStay(new Stay(patientID, bedID, timeStart, timeEnd, 0)) > 0)
+					if(dbManager.executeStayInput(patientID, timeStart, timeEnd))
+					//if (dbManager.addStay(new Stay(patientID, bedID, timeStart, timeEnd, 0)) > 0)
 						System.out.println("입원예약이 완료되었습니다.");
+					else
+						System.err.println("입원예약 실패.");
 
 					return goMainMenu();
 				} else {

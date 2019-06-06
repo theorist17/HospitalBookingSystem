@@ -71,6 +71,12 @@ public class StringChecker {
       }
       return true;
    }
+   public static boolean checkAdmission2(String admission) {
+	      if (!admission.matches("[가-힣]{3}\\/[1-9]{1}[0-9]{12}\\/[0-9]{10}\\/[0-9]{10}")) {
+	         return false;
+	      }
+	      return true;
+	   }
 
    public static boolean lookupAppoint(String appoint) {
       if (!appoint.matches("^[가-힣]{3}$\\/^[0-9]{13}$")) {

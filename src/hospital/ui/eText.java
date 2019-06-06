@@ -72,7 +72,9 @@ public enum eText{
                         + "20번침대 (6호실)" + "\t"
                         + "21번침대 (6호실)"
                      ),
+      Bed_Information2("입원 정보입니다."),
       Bed_InputInformation("이름/주민번호/침대번호/시작시간/종료시간 순으로 입력하세요."),
+      Bed_InputInformation2("이름/주민번호/시작시간/종료시간 순으로 입력하세요."),
       Appointment_Patient("예약하신 환자의 이름/주민번호를 입력하세요."),
       
       

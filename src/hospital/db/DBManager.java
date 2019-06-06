@@ -303,7 +303,7 @@ public class DBManager {
 			statement.setInt(2, stay.getBedID());
 			statement.setString(3, stay.getTimeStart());
 			statement.setString(4, stay.getTimeEnd());
-
+			
 			int affectedRows = statement.executeUpdate();
 
 			if (affectedRows == 0) {
@@ -1080,7 +1080,6 @@ public class DBManager {
 	public List<Doctor> executeCheckFree_id(String timeStart, String timeEnd,int DoctorID, String deptName) {
 		try {
 			
-			System.out.println("executeCheckFree_id");
 			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL free_id(?, ?, ?, ?, ?);");
 //			statement = conn.prepareStatement("CALL doctor_available(?, ?, ?,?);");
 //			statement.setString(1, timeStart);
@@ -1092,7 +1091,7 @@ public class DBManager {
 			csmt.setString(4, deptName);
 			csmt.registerOutParameter(5, Types.INTEGER);
 			csmt.execute();
-			System.out.println("getint:"+csmt.getInt(5));
+			//System.out.println("getint:"+csmt.getInt(5));
 			
 		
 
@@ -1116,6 +1115,26 @@ public class DBManager {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public boolean executeStayInput(String patientID, String timeStart, String timeEnd) {
+		try {
+			
+			CallableStatement csmt=(CallableStatement) conn.prepareCall("CALL stay_input(?, ?, ?, ?);");
+			csmt.setString(1, patientID);
+			csmt.setString(2, timeStart);
+			csmt.setString(3, timeEnd);
+			csmt.registerOutParameter(4, Types.BOOLEAN);
+			csmt.execute();
+			return csmt.getBoolean(4);
+
+		} catch (SQLException e) {
+			System.err.println("SQLException: " + e.getMessage());
+			System.err.println("SQLState: " + e.getSQLState());
+			System.err.println("VendorError: " + e.getErrorCode());
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	public void disconnectDb() {
