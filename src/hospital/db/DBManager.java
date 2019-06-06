@@ -51,7 +51,7 @@ public class DBManager {
 	public void LoadConnection()  {
 		try {
 			conn = DriverManager
-					.getConnection("jdbc:mysql://175.113.152.102:3306/hospital?" + "user=dev&password=MySQL!=1");
+					.getConnection("jdbc:mysql://175.113.152.102:3306/hospital?" + "user=dev&password=MySQL!=1&useUnicode=true&characterEncoding=utf8");
 
 			if (conn != null) {
 				log("Connection Successful! Now it's time to push data.");
